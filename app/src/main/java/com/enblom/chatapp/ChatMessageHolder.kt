@@ -15,7 +15,6 @@ import com.squareup.picasso.Picasso
 class ChatMessageHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
     private val emojiRegexUtil = EmojiRegexUtil()
-    private val emo_regex = Regex("[\\u20a0-\\u32ff\\ud83c\\udc00-\\ud83d\\udeff\\udbb9\\udce5-\\udbb9\\udcee]")
     private val messageLayout: LinearLayout? = itemView.findViewById(R.id.messageLayout)
     private val messageTextView: TextView? = itemView.findViewById(R.id.messageTextView)
     private val otherImageView: ImageView? = itemView.findViewById(R.id.otherImageView)

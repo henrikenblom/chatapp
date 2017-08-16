@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "294498332883",
+    "firebase_url": "https://chat-app-e15da.firebaseio.com",
+    "project_id": "chat-app-e15da",
+    "storage_bucket": "chat-app-e15da.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:294498332883:android:e4f07b08a2cf5764",
+        "android_client_info": {
+          "package_name": "com.enblom.chatapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "294498332883-vsuau4ej4untp3e0ulpnsq6lkofs98dh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.enblom.chatapp",
+            "certificate_hash": "34ec262d049147feed31d1ecec707675a3989e5a"
+          }
+        },
+        {
+          "client_id": "294498332883-t6abt2sbmamm4len0gm7kjt0tjk4ehsr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBDUVZ_KdnjigkiDIdPbltdw3VrmmdlKso"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "294498332883-t6abt2sbmamm4len0gm7kjt0tjk4ehsr.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_members_selection_done">Börja chatta</string>
+    <string name="action_sign_in">Logga in eller registrera</string>
+    <string name="action_sign_in_short">Logga in</string>
+    <string name="error_field_required">Nödvändigt fält</string>
+    <string name="error_incorrect_password">Fel lösenord</string>
+    <string name="error_invalid_email">Felaktig e-postadress</string>
+    <string name="error_invalid_password">Lösenordet är för kort</string>
+    <string name="message_no_active_chats">Det finns inga aktiva chattar…</string>
+    <string name="navigation_drawer_close">Stäng navigationsfältet</string>
+    <string name="navigation_drawer_open">Öppna navigatonsfältet</string>
+    <string name="no_friends">Inga registrerade personer att chatta med</string>
+    <string name="permission_rationale">\"Kontakträttigheter krävs för e-postförslag.\"</string>
+    <string name="prompt_email">E-postadress</string>
+    <string name="prompt_password">Lösenord (krävs ej)</string>
+    <string name="sign_out">Logga ut</string>
+    <string name="title_activity_login">Logga in</string>
+    <string name="title_activity_main">Aktiva chattar</string>
+    <string name="title_activity_new_chat">Ny chatt</string>
+    <string name="just_now">Nyss</string>
+</resources>

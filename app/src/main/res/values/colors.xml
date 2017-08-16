@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="accent_chatapp">#008c9c</color>
+    <color name="accent_light">#0090ff</color>
+    <color name="primary_chatapp">#02b875</color>
+    <color name="foreground_chatapp">#000000</color>
+    <color name="light_chatapp">#f5f5f5</color>
+    <color name="chatapp_other_message">#e0e0e0</color>
+    <color name="chatapp_my_message">#88dda0</color>
+    <color name="transparent">#00000000</color>
+</resources>

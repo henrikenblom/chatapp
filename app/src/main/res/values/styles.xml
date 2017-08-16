@@ -1,0 +1,19 @@
+<resources>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
+    <style name="ChatAppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorAccent">@color/accent_chatapp</item>
+        <item name="colorPrimary">@color/primary_chatapp</item>
+        <item name="android:colorForeground">@color/foreground_chatapp</item>
+        <item name="android:colorBackground">@android:color/background_light</item>
+        <item name="android:textColorPrimary">@android:color/primary_text_light</item>
+        <item name="colorPrimaryDark">@color/foreground_chatapp</item>
+    </style>
+    <style name="ToolBarStyle" parent="ChatAppTheme">
+        <item name="android:textColorPrimary">@android:color/white</item>
+        <item name="android:textColorSecondary">@android:color/white</item>
+        <item name="android:background">@color/primary_chatapp</item>
+        <item name="actionMenuTextColor">@android:color/white</item>
+    </style>
+</resources>

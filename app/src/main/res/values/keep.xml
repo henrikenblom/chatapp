@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools"
+           tools:keep="@drawable/ic_exit_to_app_black_24dp.xml,
+@drawable/ic_sentiment_dissatisfied_black_24dp.xml"/>

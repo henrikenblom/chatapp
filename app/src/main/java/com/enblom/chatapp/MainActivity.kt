@@ -97,13 +97,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private fun verifyCredentials() {
 
-        if (mUser != null) {
-            mUser.getIdToken(true).addOnCompleteListener {
-                if (!it.isSuccessful)
-                    gotoLogin()
+        if (ChatApp.instance.connected) {
+            if (mUser != null) {
+                mUser.getIdToken(true).addOnCompleteListener {
+                    if (!it.isSuccessful)
+                        gotoLogin()
+                }
+            } else {
+                gotoLogin()
             }
-        } else {
-            gotoLogin()
         }
 
     }

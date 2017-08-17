@@ -9,7 +9,6 @@ import android.support.design.widget.NavigationView
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBarDrawerToggle
-import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.view.MenuItem
 import android.view.View
@@ -18,9 +17,6 @@ import android.widget.ImageView
 import com.firebase.ui.database.ClassSnapshotParser
 import com.firebase.ui.database.FirebaseArray
 import com.firebase.ui.database.FirebaseRecyclerAdapter
-import com.google.android.gms.auth.api.Auth
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
 import com.google.firebase.iid.FirebaseInstanceId
 import com.makeramen.roundedimageview.RoundedTransformationBuilder
@@ -34,9 +30,8 @@ fun Context.MainActivityIntent(): Intent {
     return Intent(this, MainActivity::class.java)
 }
 
-class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
+class MainActivity : ConnectedActivity(), NavigationView.OnNavigationItemSelectedListener {
 
-    val mUser: FirebaseUser? = FirebaseAuth.getInstance().currentUser
     val databaseReference: DatabaseReference = FirebaseDatabase.getInstance().reference
     val userProfileParser = ClassSnapshotParser<UserProfile>(UserProfile::class.java)
     private val mLinearLayoutManager: LinearLayoutManager = LinearLayoutManager(this)
@@ -79,11 +74,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     }
 
-    override fun onActivityReenter(resultCode: Int, data: Intent?) {
-        super.onActivityReenter(resultCode, data)
-        verifyCredentials()
-    }
-
     override fun onStart() {
 
         super.onStart()
@@ -93,26 +83,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             putNotificationToken()
         }
 
-    }
-
-    private fun verifyCredentials() {
-
-        if (ChatApp.instance.connected) {
-            if (mUser != null) {
-                mUser.getIdToken(true).addOnCompleteListener {
-                    if (!it.isSuccessful)
-                        gotoLogin()
-                }
-            } else {
-                gotoLogin()
-            }
-        }
-
-    }
-
-    private fun gotoLogin() {
-        startActivity(LoginActivityIntent(LoginActivity.POSTLOGIN_GOTO_MAIN))
-        finish()
     }
 
     private fun putNotificationToken() {
@@ -154,18 +124,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 .build()
 
         Picasso.with(context).load(url).fit().transform(transformation).into(this)
-
-    }
-
-    private fun signOut() {
-
-        FirebaseAuth.getInstance().signOut()
-
-        Auth.GoogleSignInApi.signOut(ChatApp.instance.googleApiHelper.googleApiClient).setResultCallback {
-            if (it.isSuccess) {
-                gotoLogin()
-            }
-        }
 
     }
 

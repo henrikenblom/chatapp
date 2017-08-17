@@ -3,7 +3,6 @@ package com.enblom.chatapp
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import com.firebase.ui.database.ClassSnapshotParser
 import com.firebase.ui.database.FirebaseArray
@@ -21,7 +20,7 @@ fun Context.ChatActivityIntent(chatKey: String, chatName: String): Intent {
     return intent
 }
 
-class ChatActivity : AppCompatActivity() {
+class ChatActivity : ConnectedActivity() {
 
     val TEN_MINUTES = 600000L
     val currentUser: FirebaseUser? = FirebaseAuth.getInstance().currentUser
@@ -107,9 +106,8 @@ class ChatActivity : AppCompatActivity() {
                     .child("messages")
                     .push()
                     .setValue(message)
-                    .addOnCompleteListener {
-                        editText.text.clear()
-                    }
+
+            editText.text.clear()
 
         }
 

@@ -3,7 +3,6 @@ package com.enblom.chatapp
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.view.View
 import com.firebase.ui.database.ClassSnapshotParser
@@ -19,7 +18,7 @@ fun Context.NewChatActivityIntent(): Intent {
     return Intent(this, NewChatActivity::class.java)
 }
 
-class NewChatActivity : AppCompatActivity() {
+class NewChatActivity : ConnectedActivity() {
 
     val currentUser: FirebaseUser? = FirebaseAuth.getInstance().currentUser
     val databaseReference: DatabaseReference = FirebaseDatabase.getInstance().reference

@@ -19,4 +19,6 @@
     <string name="title_activity_main">Aktiva chattar</string>
     <string name="title_activity_new_chat">Ny chatt</string>
     <string name="just_now">Nyss</string>
+    <string name="connected">Ansluten</string>
+    <string name="disconnected">Ej ansluten</string>
 </resources>

@@ -3,6 +3,7 @@ package com.enblom.chatapp
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.CardView
 import android.support.v7.widget.RecyclerView
+import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
 import android.widget.ImageView
@@ -29,6 +30,9 @@ class ChatMessageHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     fun bind(text: String?, photoUrl: String? = null, ownMessage: Boolean, imageDecoration: ImageDecoration, messageTime: Long?) {
 
         messageTextView?.text = text
+        var messageBackgroundColor = ContextCompat.getColor(itemView.context, R.color.chatapp_my_message)
+        var messageTextSize = itemView.resources.getDimension(R.dimen.chat_message_textsize)
+        var emojiTextSize = messageTextSize * 2
 
         if (messageTime != null) {
             messageTimeView?.setReferenceTime(messageTime)
@@ -40,26 +44,20 @@ class ChatMessageHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         if (ownMessage) {
             if (photoUrl != null) meImageView?.loadUrlAsRoundImage(photoUrl)
             messageLayout?.gravity = Gravity.END
-            if (text != null
-                    && text.matches(emojiRegexUtil.fullEmojiRegex)) {
-                cardView?.setCardBackgroundColor(ContextCompat.getColor(itemView.context, R.color.transparent))
-                messageTextView?.textSize = 32f
-            } else {
-                cardView?.setCardBackgroundColor(ContextCompat.getColor(itemView.context, R.color.chatapp_my_message))
-                messageTextView?.textSize = 16f
-            }
         } else {
             if (photoUrl != null) otherImageView?.loadUrlAsRoundImage(photoUrl)
             messageLayout?.gravity = Gravity.START
-            if (text != null
-                    && text.matches(emojiRegexUtil.fullEmojiRegex)) {
-                cardView?.setCardBackgroundColor(ContextCompat.getColor(itemView.context, R.color.transparent))
-                messageTextView?.textSize = 32f
-            } else {
-                cardView?.setCardBackgroundColor(ContextCompat.getColor(itemView.context, R.color.chatapp_other_message))
-                messageTextView?.textSize = 16f
-            }
+            messageBackgroundColor = ContextCompat.getColor(itemView.context, R.color.chatapp_other_message)
         }
+
+        if (text != null
+                && text.matches(emojiRegexUtil.fullEmojiRegex)) {
+            messageBackgroundColor = ContextCompat.getColor(itemView.context, R.color.transparent)
+            messageTextSize = emojiTextSize
+        }
+
+        cardView?.setCardBackgroundColor(messageBackgroundColor)
+        messageTextView?.setTextSize(TypedValue.COMPLEX_UNIT_PX, messageTextSize)
 
         when (imageDecoration) {
             ImageDecoration.ME -> {

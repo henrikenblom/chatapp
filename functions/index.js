@@ -103,7 +103,7 @@ exports.sendMessageNotifications = functions.database.ref("/chats/{chatId}/messa
     });
 });
 exports.cleanUpChat = functions.database.ref("/chats/{chatId}/members/{memberKey}").onDelete(function (event) {
-    admin.database()
+    return admin.database()
         .ref("user_chats")
         .child(event.params.memberKey)
         .child(event.params.chatId)

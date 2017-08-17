@@ -5,24 +5,27 @@ import android.support.v7.app.AppCompatActivity
 import com.google.android.gms.auth.api.Auth
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.database.FirebaseDatabase
 
 abstract class ConnectedActivity : AppCompatActivity() {
 
-    val mUser: FirebaseUser? = FirebaseAuth.getInstance().currentUser
+    val firebaseDatabase = FirebaseDatabase.getInstance()
+    val currentUser: FirebaseUser? = FirebaseAuth.getInstance().currentUser
 
     protected fun verifyCredentials() {
-
         if (ChatApp.instance.connected) {
-            if (mUser != null) {
-                mUser.getIdToken(true).addOnCompleteListener {
-                    if (!it.isSuccessful)
+            if (currentUser != null) {
+                currentUser.getIdToken(true).addOnCompleteListener {
+                    if (it.isSuccessful) {
+                        ChatApp.instance.currentUserId = currentUser.uid
+                    } else {
                         gotoLogin()
+                    }
                 }
             } else {
                 gotoLogin()
             }
         }
-
     }
 
     private fun gotoLogin() {

@@ -7,14 +7,12 @@ var UserProfile = (function () {
         this.photoURL = firebaseUser.photoURL;
         this.uid = firebaseUser.uid;
     }
-
     return UserProfile;
 }());
 exports.UserProfile = UserProfile;
 var ChatMessage = (function () {
     function ChatMessage() {
     }
-
     return ChatMessage;
 }());
 exports.ChatMessage = ChatMessage;

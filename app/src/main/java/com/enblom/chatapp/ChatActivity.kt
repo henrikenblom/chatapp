@@ -7,8 +7,6 @@ import android.support.v7.widget.LinearLayoutManager
 import com.firebase.ui.database.ClassSnapshotParser
 import com.firebase.ui.database.FirebaseArray
 import com.firebase.ui.database.FirebaseRecyclerAdapter
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
 import kotlinx.android.synthetic.main.activity_chat.*
 import org.jetbrains.anko.sdk25.coroutines.onClick
@@ -23,11 +21,14 @@ fun Context.ChatActivityIntent(chatKey: String, chatName: String): Intent {
 class ChatActivity : ConnectedActivity() {
 
     val TEN_MINUTES = 600000L
-    val currentUser: FirebaseUser? = FirebaseAuth.getInstance().currentUser
     val databaseReference: DatabaseReference = FirebaseDatabase.getInstance().reference
     val mLinearLayoutManager: LinearLayoutManager = LinearLayoutManager(this)
     val userProfileParser = ClassSnapshotParser<UserProfile>(UserProfile::class.java)
     val userProfiles = HashMap<String, UserProfile>()
+    val profileReference: DatabaseReference = firebaseDatabase
+            .getReference("userprofiles")
+            .child(currentUser?.uid)
+    val userConnectionsReference: DatabaseReference = profileReference.child("connections").push()
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -83,6 +84,35 @@ class ChatActivity : ConnectedActivity() {
 
                 })
 
+    }
+
+    override fun onStart() {
+
+        super.onStart()
+
+        FirebaseDatabase.getInstance().getReference(".info/connected")
+                .addValueEventListener(object : ValueEventListener {
+
+                    override fun onCancelled(error: DatabaseError?) = Unit
+
+                    override fun onDataChange(snapshot: DataSnapshot?) {
+
+                        if (snapshot?.getValue(Boolean::class.java) as Boolean) {
+                            userConnectionsReference.onDisconnect().removeValue()
+                            userConnectionsReference.setValue(ServerValue.TIMESTAMP)
+                            profileReference.child("lastSeenAt").onDisconnect().setValue(ServerValue.TIMESTAMP)
+                        }
+
+                    }
+
+                })
+
+    }
+
+    override fun onPause() {
+        super.onPause()
+        userConnectionsReference.removeValue()
+        profileReference.child("lastSeenAt").setValue(ServerValue.TIMESTAMP)
     }
 
     override fun getParentActivityIntent(): Intent {

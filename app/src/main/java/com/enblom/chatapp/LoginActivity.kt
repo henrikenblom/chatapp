@@ -70,6 +70,7 @@ class LoginActivity : AppCompatActivity() {
         FirebaseAuth.getInstance().signInWithCredential(credential)
                 .addOnCompleteListener {
                     if (it.isSuccessful) {
+                        ChatApp.instance.currentUserId = FirebaseAuth.getInstance().currentUser?.uid
                         if (intent.getIntExtra("postLoginGoto", 0) == POSTLOGIN_GOTO_CHAT) {
                             startActivity(ChatActivityIntent(intent.getStringExtra("chatKey"),
                                     intent.getStringExtra("chatName")))

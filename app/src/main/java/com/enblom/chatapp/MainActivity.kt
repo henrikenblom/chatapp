@@ -61,9 +61,9 @@ class MainActivity : ConnectedActivity(), NavigationView.OnNavigationItemSelecte
         drawer_layout.viewTreeObserver.addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
             override fun onGlobalLayout() {
                 drawer_layout.viewTreeObserver.removeOnGlobalLayoutListener(this)
-                viewUserEmail.text = mUser?.email
-                viewUserDisplayName.text = mUser?.displayName
-                viewUserImage.loadUrlAsRoundImage(mUser?.photoUrl.toString())
+                viewUserEmail.text = currentUser?.email
+                viewUserDisplayName.text = currentUser?.displayName
+                viewUserImage.loadUrlAsRoundImage(currentUser?.photoUrl.toString())
             }
         })
 
@@ -78,7 +78,7 @@ class MainActivity : ConnectedActivity(), NavigationView.OnNavigationItemSelecte
 
         super.onStart()
 
-        if (mUser != null) {
+        if (currentUser != null) {
             chatList.adapter = getAdapter()
             putNotificationToken()
         }
@@ -89,7 +89,7 @@ class MainActivity : ConnectedActivity(), NavigationView.OnNavigationItemSelecte
 
         databaseReference
                 .child("userprofiles")
-                .child(mUser?.uid)
+                .child(currentUser?.uid)
                 .addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onCancelled(p0: DatabaseError?) = Unit
                     override fun onDataChange(snapshot: DataSnapshot) {
@@ -105,7 +105,7 @@ class MainActivity : ConnectedActivity(), NavigationView.OnNavigationItemSelecte
 
                             databaseReference
                                     .child("userprofiles")
-                                    .child(mUser?.uid)
+                                    .child(currentUser?.uid)
                                     .child("notificationTokens")
                                     .setValue(tokens)
 
@@ -129,7 +129,7 @@ class MainActivity : ConnectedActivity(), NavigationView.OnNavigationItemSelecte
 
     private fun getAdapter(): FirebaseRecyclerAdapter<Any, ChatListEntryHolder> {
 
-        val uid = mUser?.uid
+        val uid = currentUser?.uid
         val query = databaseReference.child("user_chats").child(uid).orderByChild("orderBy")
         val parser = ClassSnapshotParser<Any>(Any::class.java)
         val firebaseArray = FirebaseArray(query, parser)

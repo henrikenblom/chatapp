@@ -7,8 +7,6 @@ import android.support.v7.widget.LinearLayoutManager
 import android.view.View
 import com.firebase.ui.database.ClassSnapshotParser
 import com.firebase.ui.database.FirebaseRecyclerAdapter
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
 import kotlinx.android.synthetic.main.activity_new_chat.*
 import java.util.zip.CRC32
@@ -20,7 +18,6 @@ fun Context.NewChatActivityIntent(): Intent {
 
 class NewChatActivity : ConnectedActivity() {
 
-    val currentUser: FirebaseUser? = FirebaseAuth.getInstance().currentUser
     val databaseReference: DatabaseReference = FirebaseDatabase.getInstance().reference
     val chatMembers = HashSet<String>()
 

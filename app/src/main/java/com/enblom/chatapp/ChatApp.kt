@@ -16,6 +16,7 @@ class ChatApp : Application() {
     var connected = false
     var starting = true
     var inForeground = false
+    var currentUserId: String? = null
 
     companion object {
         lateinit var instance: ChatApp

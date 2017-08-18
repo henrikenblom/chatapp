@@ -96,7 +96,6 @@ class NewChatActivity : ConnectedActivity() {
 
     private fun calculateMemberChecksum(): String {
         val chatChecksum = CRC32()
-
         for (chatMember: String in chatMembers.sorted())
             chatChecksum.update(chatMember.toByteArray())
 

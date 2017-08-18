@@ -9,6 +9,8 @@ class UserProfile {
     var photoURL: String? = null
     var uid: String? = null
     var createdAt: Long? = null
+    var lastSeenAt: Long? = null
     var notificationTokens: ArrayList<String?> = ArrayList()
+    var connections: HashMap<String, Long> = HashMap()
 
 }

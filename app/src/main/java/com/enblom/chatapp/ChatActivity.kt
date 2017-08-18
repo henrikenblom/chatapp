@@ -20,7 +20,7 @@ fun Context.ChatActivityIntent(chatKey: String, chatName: String): Intent {
 
 class ChatActivity : ConnectedActivity() {
 
-    val TEN_MINUTES = 600000L
+    private val TEN_MINUTES = 600000L
     val databaseReference: DatabaseReference = FirebaseDatabase.getInstance().reference
     val mLinearLayoutManager: LinearLayoutManager = LinearLayoutManager(this)
     val userProfileParser = ClassSnapshotParser<UserProfile>(UserProfile::class.java)
@@ -28,34 +28,41 @@ class ChatActivity : ConnectedActivity() {
     val profileReference: DatabaseReference = firebaseDatabase
             .getReference("userprofiles")
             .child(currentUser?.uid)
-    val userConnectionsReference: DatabaseReference = profileReference.child("connections").push()
+    var userConnectionsReference: DatabaseReference? = null
+    var onDisconnectReference: OnDisconnect? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
+
+        val chatKey = intent.getStringExtra("chatKey")
+        val chatName = intent.getStringExtra("chatName")
+
         setSupportActionBar(chatToolbar)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowHomeEnabled(true)
         supportActionBar?.setDisplayShowTitleEnabled(true)
-        supportActionBar?.title = intent.getStringExtra("chatName")
+        supportActionBar?.title = chatName
 
         submitButton.onClick {
             submitMessage()
         }
 
+        userConnectionsReference = profileReference.child("connections").child(deviceId)
+
         if (currentUser == null) {
             startActivity(LoginActivityIntent(LoginActivity.POSTLOGIN_GOTO_CHAT,
-                    intent.getStringExtra("chatKey"),
-                    intent.getStringExtra("chatName")))
+                    chatKey,
+                    chatName))
         }
 
         chatMessageView.layoutManager = mLinearLayoutManager
 
         databaseReference
                 .child("chats")
-                .child(intent.getStringExtra("chatKey"))
+                .child(chatKey)
                 .addListenerForSingleValueEvent(object : ValueEventListener {
 
                     override fun onCancelled(p0: DatabaseError?) {
@@ -86,32 +93,37 @@ class ChatActivity : ConnectedActivity() {
 
     }
 
-    override fun onStart() {
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
 
-        super.onStart()
+        super.onWindowFocusChanged(hasFocus)
 
-        FirebaseDatabase.getInstance().getReference(".info/connected")
-                .addValueEventListener(object : ValueEventListener {
+        if (hasFocus) {
+            onDisconnectReference?.cancel()
 
-                    override fun onCancelled(error: DatabaseError?) = Unit
+            FirebaseDatabase.getInstance().getReference(".info/connected")
+                    .addValueEventListener(object : ValueEventListener {
 
-                    override fun onDataChange(snapshot: DataSnapshot?) {
+                        override fun onCancelled(error: DatabaseError?) = Unit
 
-                        if (snapshot?.getValue(Boolean::class.java) as Boolean) {
-                            userConnectionsReference.onDisconnect().removeValue()
-                            userConnectionsReference.setValue(ServerValue.TIMESTAMP)
-                            profileReference.child("lastSeenAt").onDisconnect().setValue(ServerValue.TIMESTAMP)
+                        override fun onDataChange(snapshot: DataSnapshot?) {
+
+                            if (snapshot?.getValue(Boolean::class.java) as Boolean) {
+                                onDisconnectReference = userConnectionsReference?.onDisconnect()
+                                onDisconnectReference?.removeValue()
+                                userConnectionsReference?.setValue(ServerValue.TIMESTAMP)
+                                profileReference.child("lastSeenAt").onDisconnect().setValue(ServerValue.TIMESTAMP)
+                            }
+
                         }
 
-                    }
-
-                })
+                    })
+        }
 
     }
 
     override fun onPause() {
         super.onPause()
-        userConnectionsReference.removeValue()
+        userConnectionsReference?.removeValue()
         profileReference.child("lastSeenAt").setValue(ServerValue.TIMESTAMP)
     }
 

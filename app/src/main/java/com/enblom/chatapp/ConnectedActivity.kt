@@ -1,31 +1,33 @@
 package com.enblom.chatapp
 
 import android.content.Intent
+import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import com.google.android.gms.auth.api.Auth
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.iid.FirebaseInstanceId
+import java.util.zip.CRC32
 
 abstract class ConnectedActivity : AppCompatActivity() {
 
-    val firebaseDatabase = FirebaseDatabase.getInstance()
+    val firebaseDatabase: FirebaseDatabase = FirebaseDatabase.getInstance()
     val currentUser: FirebaseUser? = FirebaseAuth.getInstance().currentUser
+    var deviceId: String? = null
 
     protected fun verifyCredentials() {
-        if (ChatApp.instance.connected) {
             if (currentUser != null) {
-                currentUser.getIdToken(true).addOnCompleteListener {
-                    if (it.isSuccessful) {
-                        ChatApp.instance.currentUserId = currentUser.uid
-                    } else {
-                        gotoLogin()
+                if (ChatApp.instance.connected) {
+                    currentUser.getIdToken(true).addOnCompleteListener {
+                        if (!it.isSuccessful) {
+                            gotoLogin()
+                        }
                     }
                 }
             } else {
                 gotoLogin()
             }
-        }
     }
 
     private fun gotoLogin() {
@@ -43,6 +45,13 @@ abstract class ConnectedActivity : AppCompatActivity() {
             }
         }
 
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val checksum = CRC32()
+        checksum.update(FirebaseInstanceId.getInstance().token?.toByteArray())
+        deviceId = checksum.value.toString(16)
     }
 
     override fun onActivityReenter(resultCode: Int, data: Intent?) {

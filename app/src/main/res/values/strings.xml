@@ -26,4 +26,6 @@
     <string name="just_now">Just now</string>
     <string name="connected">Connected</string>
     <string name="disconnected">Disconnected</string>
+    <string name="last_seen_label">Last seen:</string>
+    <string name="last_active">Last active:</string>
 </resources>

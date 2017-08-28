@@ -21,4 +21,6 @@
     <string name="just_now">Nyss</string>
     <string name="connected">Ansluten</string>
     <string name="disconnected">Ej ansluten</string>
+    <string name="last_seen_label">Senast sedd:</string>
+    <string name="last_active">Senast aktiv:</string>
 </resources>

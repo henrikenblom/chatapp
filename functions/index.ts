@@ -17,6 +17,8 @@ exports.setupNewUser = functions.auth.user().onCreate(event => {
 
 exports.setupNewChat = functions.database.ref("/chats/{chatId}").onCreate(event => {
 
+    const timestamp = admin.database.ServerValue.TIMESTAMP;
+
     getAllProfiles().then(data => {
 
         const userProfiles = data.userProfiles;
@@ -24,6 +26,7 @@ exports.setupNewChat = functions.database.ref("/chats/{chatId}").onCreate(event 
         getChatmembers(event.params.chatId).then(data => {
 
             const members = data.members;
+            const isGroupChat = Object.keys(members).length > 2;
 
             for (let memberKey in members) {
 
@@ -45,6 +48,20 @@ exports.setupNewChat = functions.database.ref("/chats/{chatId}").onCreate(event 
                     .child("chat_name")
                     .set(chatName.join(", "));
 
+                admin.database()
+                    .ref("user_chats")
+                    .child(memberKey)
+                    .child(event.params.chatId)
+                    .child("isGroupChat")
+                    .set(isGroupChat);
+
+                admin.database()
+                    .ref("user_chats")
+                    .child(memberKey)
+                    .child(event.params.chatId)
+                    .child("lastMessageAt")
+                    .set(timestamp);
+
                 for (let photo of memberPhotos) {
                     admin.database()
                         .ref("user_chats")
@@ -55,10 +72,11 @@ exports.setupNewChat = functions.database.ref("/chats/{chatId}").onCreate(event 
                 }
 
             }
+
         });
     });
 
-    return event.data.ref.child("createdAt").set(admin.database.ServerValue.TIMESTAMP);
+    return event.data.ref.child("createdAt").set(timestamp);
 
 });
 
@@ -68,10 +86,18 @@ exports.updateChatMessageTimestamps = functions.database.ref("/chats/{chatId}/me
 
         const timestamp = new Date().getTime();
         const members = data.members;
+        const groupChat = Object.keys(members).length > 2;
 
         for (let memberKey in members) {
 
             let orderBy = YEAR_3000 - timestamp;
+
+            admin.database()
+                .ref("user_chats")
+                .child(memberKey)
+                .child(event.params.chatId)
+                .child("groupChat")
+                .set(groupChat);
 
             admin.database()
                 .ref("user_chats")

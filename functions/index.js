@@ -12,10 +12,12 @@ exports.setupNewUser = functions.auth.user().onCreate(function (event) {
     return reference.set(userProfile);
 });
 exports.setupNewChat = functions.database.ref("/chats/{chatId}").onCreate(function (event) {
+    var timestamp = admin.database.ServerValue.TIMESTAMP;
     getAllProfiles().then(function (data) {
         var userProfiles = data.userProfiles;
         getChatmembers(event.params.chatId).then(function (data) {
             var members = data.members;
+            var isGroupChat = Object.keys(members).length > 2;
             for (var memberKey in members) {
                 var chatName = [];
                 var memberPhotos = [];
@@ -32,6 +34,18 @@ exports.setupNewChat = functions.database.ref("/chats/{chatId}").onCreate(functi
                     .child(event.params.chatId)
                     .child("chat_name")
                     .set(chatName.join(", "));
+                admin.database()
+                    .ref("user_chats")
+                    .child(memberKey)
+                    .child(event.params.chatId)
+                    .child("isGroupChat")
+                    .set(isGroupChat);
+                admin.database()
+                    .ref("user_chats")
+                    .child(memberKey)
+                    .child(event.params.chatId)
+                    .child("lastMessageAt")
+                    .set(timestamp);
                 for (var _i = 0, memberPhotos_1 = memberPhotos; _i < memberPhotos_1.length; _i++) {
                     var photo = memberPhotos_1[_i];
                     admin.database()
@@ -44,14 +58,21 @@ exports.setupNewChat = functions.database.ref("/chats/{chatId}").onCreate(functi
             }
         });
     });
-    return event.data.ref.child("createdAt").set(admin.database.ServerValue.TIMESTAMP);
+    return event.data.ref.child("createdAt").set(timestamp);
 });
 exports.updateChatMessageTimestamps = functions.database.ref("/chats/{chatId}/messages/{messageId}").onCreate(function (event) {
     getChatmembers(event.params.chatId).then(function (data) {
         var timestamp = new Date().getTime();
         var members = data.members;
+        var groupChat = Object.keys(members).length > 2;
         for (var memberKey in members) {
             var orderBy = YEAR_3000 - timestamp;
+            admin.database()
+                .ref("user_chats")
+                .child(memberKey)
+                .child(event.params.chatId)
+                .child("groupChat")
+                .set(groupChat);
             admin.database()
                 .ref("user_chats")
                 .child(memberKey)

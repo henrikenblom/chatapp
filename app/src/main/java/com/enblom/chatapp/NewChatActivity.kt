@@ -43,6 +43,8 @@ class NewChatActivity : ConnectedActivity() {
         userList.setHasFixedSize(false)
         userList.layoutManager = mManager
 
+        databaseReference.child("chats").keepSynced(true)
+
     }
 
     override fun onStart() {

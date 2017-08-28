@@ -17,6 +17,9 @@ abstract class ConnectedActivity : AppCompatActivity() {
     var deviceId: String? = null
 
     protected fun verifyCredentials() {
+
+        var mUser: FirebaseUser? = FirebaseAuth.getInstance().currentUser
+
             if (currentUser != null) {
                 if (ChatApp.instance.connected) {
                     currentUser.getIdToken(true).addOnCompleteListener {
@@ -49,9 +52,14 @@ abstract class ConnectedActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        verifyCredentials()
         val checksum = CRC32()
-        checksum.update(FirebaseInstanceId.getInstance().token?.toByteArray())
-        deviceId = checksum.value.toString(16)
+        var instance: FirebaseInstanceId? = FirebaseInstanceId.getInstance()
+
+        if (instance != null) {
+            checksum.update(FirebaseInstanceId.getInstance().token?.toByteArray())
+            deviceId = checksum.value.toString(16)
+        }
     }
 
     override fun onActivityReenter(resultCode: Int, data: Intent?) {

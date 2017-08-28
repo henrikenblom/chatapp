@@ -138,12 +138,26 @@ class MainActivity : ConnectedActivity(), NavigationView.OnNavigationItemSelecte
                 firebaseArray,
                 R.layout.chatlist_entry,
                 ChatListEntryHolder::class.java) {
-            public override fun populateViewHolder(entryHolder: ChatListEntryHolder, chatName: Any, position: Int) {
-                val entryMap = chatName as HashMap<String, Any>
+
+            public override fun populateViewHolder(entryHolder: ChatListEntryHolder, chatData: Any, position: Int) {
+                val entryMap = chatData as HashMap<String, Any>
                 val snapshot = firebaseArray[position]
+                var isGroupChat: Boolean = false
+                var lastActiveAt: Long = 0L
+
+                if (entryMap.containsKey("lastMessageAt")) {
+                    lastActiveAt = entryMap["lastMessageAt"] as Long
+                }
+
+                if (entryMap.containsKey("isGroupChat")) {
+                    isGroupChat = entryMap["isGroupChat"] as Boolean
+                }
+
                 entryHolder.bind(entryMap["chat_name"] as String,
                         snapshot.key,
-                        snapshot.ref.child("photos").orderByKey())
+                        snapshot.ref.child("photos").orderByKey(),
+                        isGroupChat,
+                        lastActiveAt)
             }
 
             override fun onDataChanged() {

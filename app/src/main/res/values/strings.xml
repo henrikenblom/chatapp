@@ -29,4 +29,8 @@
     <string name="last_seen_label">Last seen:</string>
     <string name="last_active">Last active:</string>
     <string name="edit_chatlist">Edit</string>
+    <string name="editing_chatlist">Editing</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="really_delete_chat">Are you sure you want do delete this chat?</string>
 </resources>

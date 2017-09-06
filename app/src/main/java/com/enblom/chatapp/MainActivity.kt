@@ -25,6 +25,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.android.synthetic.main.nav_header_main.*
+import org.jetbrains.anko.sdk25.coroutines.onCheckedChange
 
 fun Context.MainActivityIntent(): Intent {
     return Intent(this, MainActivity::class.java)
@@ -80,8 +81,14 @@ class MainActivity : ConnectedActivity(), NavigationView.OnNavigationItemSelecte
         super.onStart()
 
         if (currentUser != null) {
+
             chatList.adapter = getAdapter()
             putNotificationToken()
+
+            editChatlistButton.onCheckedChange { _, _ ->
+                chatList.adapter.notifyDataSetChanged()
+            }
+
         }
 
     }
@@ -141,6 +148,7 @@ class MainActivity : ConnectedActivity(), NavigationView.OnNavigationItemSelecte
                 ChatListEntryHolder::class.java) {
 
             public override fun populateViewHolder(entryHolder: ChatListEntryHolder, chatData: Any, position: Int) {
+
                 val entryMap = chatData as HashMap<String, Any>
                 val snapshot = firebaseArray[position]
                 var isGroupChat: Boolean = false
@@ -158,7 +166,8 @@ class MainActivity : ConnectedActivity(), NavigationView.OnNavigationItemSelecte
                         snapshot.key,
                         snapshot.ref.child("photos").orderByKey(),
                         isGroupChat,
-                        lastActiveAt)
+                        lastActiveAt,
+                        editChatlistButton.isChecked)
             }
 
             override fun onDataChanged() {

@@ -14,7 +14,7 @@ abstract class ConnectedActivity : AppCompatActivity() {
 
     val firebaseDatabase: FirebaseDatabase = FirebaseDatabase.getInstance()
     val currentUser: FirebaseUser? = FirebaseAuth.getInstance().currentUser
-    var deviceId: String? = null
+    lateinit var deviceId: String
 
     protected fun verifyCredentials() {
 
@@ -55,8 +55,11 @@ abstract class ConnectedActivity : AppCompatActivity() {
         var instance: FirebaseInstanceId? = FirebaseInstanceId.getInstance()
 
         if (instance != null) {
-            checksum.update(FirebaseInstanceId.getInstance().token?.toByteArray())
-            deviceId = checksum.value.toString(16)
+            val token = instance.token
+            if (!token.isNullOrEmpty()) {
+                checksum.update(instance.token?.toByteArray())
+                deviceId = checksum.value.toString(16)
+            }
         }
     }
 

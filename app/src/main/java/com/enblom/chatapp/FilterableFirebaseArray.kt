@@ -14,4 +14,19 @@ class FilterableFirebaseArray<T>(query: Query, parser: SnapshotParser<T>) : Fire
             super.onChildAdded(snapshot, if (excludedKeys.contains(previousChildKey)) null else previousChildKey)
     }
 
+    override fun onChildChanged(snapshot: DataSnapshot, previousChildKey: String?) {
+        if (!excludedKeys.contains(snapshot.key))
+            super.onChildChanged(snapshot, previousChildKey)
+    }
+
+    override fun onChildMoved(snapshot: DataSnapshot, previousChildKey: String?) {
+        if (!excludedKeys.contains(snapshot.key))
+            super.onChildMoved(snapshot, previousChildKey)
+    }
+
+    override fun onChildRemoved(snapshot: DataSnapshot) {
+        if (!excludedKeys.contains(snapshot.key))
+            super.onChildRemoved(snapshot)
+    }
+
 }

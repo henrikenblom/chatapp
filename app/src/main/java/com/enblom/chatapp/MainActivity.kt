@@ -43,6 +43,7 @@ class MainActivity : ConnectedActivity(), NavigationView.OnNavigationItemSelecte
         setContentView(R.layout.activity_main)
 
         mainToolbar.setTitle(R.string.title_activity_main)
+
         setSupportActionBar(mainToolbar)
 
         mLinearLayoutManager.stackFromEnd = true

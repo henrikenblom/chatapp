@@ -18,7 +18,21 @@
                 android:theme="@style/ToolBarStyle"
                 android:minHeight="?attr/actionBarSize"
                 android:id="@+id/mainToolbar"
-                android:layout_weight="1"/>
+                android:layout_weight="1">
+            <Button
+                    android:text="@string/edit_chatlist"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="end"
+                    android:gravity="center_vertical"
+                    android:layout_marginEnd="14dp"
+                    android:drawableStart="@drawable/ic_edit_white_24dp"
+                    android:drawablePadding="4dp"
+                    tools:ignore="ContentDescription"
+                    android:id="@+id/edit_chatlist_button"
+                    style="@style/Widget.AppCompat.Button.Borderless"
+                    android:enabled="true"/>
+        </android.support.v7.widget.Toolbar>
     </android.support.design.widget.AppBarLayout>
 
     <include layout="@layout/content_main"/>

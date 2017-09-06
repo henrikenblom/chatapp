@@ -28,4 +28,5 @@
     <string name="disconnected">Disconnected</string>
     <string name="last_seen_label">Last seen:</string>
     <string name="last_active">Last active:</string>
+    <string name="edit_chatlist">Edit</string>
 </resources>

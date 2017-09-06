@@ -73,10 +73,15 @@ class NewChatActivity : ConnectedActivity() {
                 R.layout.userlist_entry,
                 UserListEntryHolder::class.java) {
             public override fun populateViewHolder(entryHolder: UserListEntryHolder, data: UserProfile, position: Int) {
+
                 val uid: String = data.uid as String
                 entryHolder.bind(data)
                 entryHolder.checkBox?.setOnCheckedChangeListener { _, isChecked ->
-                    if (isChecked) chatMembers.add(uid) else chatMembers.remove(uid)
+                    if (isChecked)
+                        chatMembers.add(uid)
+                    else
+                        chatMembers.remove(uid)
+
                     if (chatMembers.size != 1) {
                         done_image_button.isEnabled = true
                         done_image_button.alpha = 1f
@@ -85,6 +90,7 @@ class NewChatActivity : ConnectedActivity() {
                         done_image_button.alpha = 0.5f
                     }
                 }
+
             }
 
             override fun onDataChanged() {
@@ -131,8 +137,8 @@ class NewChatActivity : ConnectedActivity() {
 
                     override fun onChildAdded(snapshot: DataSnapshot?, p1: String?) {
                         if ("chat_name" == snapshot?.key) {
-                            startActivity(ChatActivityIntent(chatKey, snapshot.value as String))
                             snapshot.ref.parent.removeEventListener(this)
+                            startActivity(ChatActivityIntent(chatKey, snapshot.value as String))
                         }
                     }
 

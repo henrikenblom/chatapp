@@ -11,21 +11,18 @@ import com.github.curioustechizen.ago.RelativeTimeTextView
 import com.google.firebase.database.Query
 import org.jetbrains.anko.sdk25.coroutines.onClick
 
-
 class ChatListEntryHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
     private val chatNameView: TextView? = itemView.findViewById(R.id.chatName)
     private val chatMemberImageList: RecyclerView? = itemView.findViewById(R.id.chatMemberImageList)
-    private val lastActiveLabel: TextView? = itemView.findViewById(R.id.lastActiveLabel)
     private val lastActiveTimeView: RelativeTimeTextView? = itemView.findViewById(R.id.lastActiveTimeView)
-    var layoutManager = LinearLayoutManager(itemView.context, LinearLayoutManager.HORIZONTAL, false)
+    private val layoutManager = LinearLayoutManager(itemView.context, LinearLayoutManager.HORIZONTAL, false)
 
     fun bind(chatName: String, chatKey: String, query: Query, isGroupChat: Boolean, lastActive: Long) {
 
         chatNameView?.text = chatName
         chatMemberImageList?.layoutManager = layoutManager
         chatMemberImageList?.adapter = getAdapter(query)
-
         lastActiveTimeView?.setReferenceTime(lastActive)
 
         itemView.onClick {

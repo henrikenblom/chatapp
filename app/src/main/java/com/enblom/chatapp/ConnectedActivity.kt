@@ -18,19 +18,17 @@ abstract class ConnectedActivity : AppCompatActivity() {
 
     protected fun verifyCredentials() {
 
-        var mUser: FirebaseUser? = FirebaseAuth.getInstance().currentUser
-
-            if (currentUser != null) {
-                if (ChatApp.instance.connected) {
-                    currentUser.getIdToken(true).addOnCompleteListener {
-                        if (!it.isSuccessful) {
-                            gotoLogin()
-                        }
+        if (currentUser != null) {
+            if (ChatApp.instance.connected) {
+                currentUser.getIdToken(true).addOnCompleteListener {
+                    if (!it.isSuccessful) {
+                        gotoLogin()
                     }
                 }
-            } else {
-                gotoLogin()
             }
+        } else {
+            gotoLogin()
+        }
     }
 
     private fun gotoLogin() {

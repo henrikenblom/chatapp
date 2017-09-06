@@ -21,23 +21,25 @@ fun Context.ChatActivityIntent(chatKey: String, chatName: String): Intent {
 class ChatActivity : ConnectedActivity() {
 
     private val TEN_MINUTES = 600000L
-    val databaseReference: DatabaseReference = FirebaseDatabase.getInstance().reference
-    val mLinearLayoutManager: LinearLayoutManager = LinearLayoutManager(this)
-    val userProfileParser = ClassSnapshotParser<UserProfile>(UserProfile::class.java)
-    val userProfiles = HashMap<String, UserProfile>()
-    val profileReference: DatabaseReference = firebaseDatabase
+    private val databaseReference: DatabaseReference = FirebaseDatabase.getInstance().reference
+    private val mLinearLayoutManager: LinearLayoutManager = LinearLayoutManager(this)
+    private val userProfileParser = ClassSnapshotParser<UserProfile>(UserProfile::class.java)
+    private val userProfiles = HashMap<String, UserProfile>()
+    private val profileReference: DatabaseReference = firebaseDatabase
             .getReference("userprofiles")
             .child(currentUser?.uid)
-    var userConnectionsReference: DatabaseReference? = null
-    var onDisconnectReference: OnDisconnect? = null
+    private var onDisconnectReference: OnDisconnect? = null
+    private lateinit var userConnectionsReference: DatabaseReference
+    private lateinit var chatKey: String
+    private lateinit var chatName: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
 
-        val chatKey = intent.getStringExtra("chatKey")
-        val chatName = intent.getStringExtra("chatName")
+        chatKey = intent.getStringExtra("chatKey")
+        chatName = intent.getStringExtra("chatName")
 
         setSupportActionBar(chatToolbar)
 
@@ -51,12 +53,6 @@ class ChatActivity : ConnectedActivity() {
         }
 
         userConnectionsReference = profileReference.child("connections").child(deviceId)
-
-        if (currentUser == null) {
-            startActivity(LoginActivityIntent(LoginActivity.POSTLOGIN_GOTO_CHAT,
-                    chatKey,
-                    chatName))
-        }
 
         chatMessageView.layoutManager = mLinearLayoutManager
 
@@ -108,9 +104,9 @@ class ChatActivity : ConnectedActivity() {
                         override fun onDataChange(snapshot: DataSnapshot?) {
 
                             if (snapshot?.getValue(Boolean::class.java) as Boolean) {
-                                onDisconnectReference = userConnectionsReference?.onDisconnect()
+                                onDisconnectReference = userConnectionsReference.onDisconnect()
                                 onDisconnectReference?.removeValue()
-                                userConnectionsReference?.setValue(ServerValue.TIMESTAMP)
+                                userConnectionsReference.setValue(ServerValue.TIMESTAMP)
                                 profileReference.child("lastSeenAt").onDisconnect().setValue(ServerValue.TIMESTAMP)
                             }
 
@@ -123,7 +119,7 @@ class ChatActivity : ConnectedActivity() {
 
     override fun onPause() {
         super.onPause()
-        userConnectionsReference?.removeValue()
+        userConnectionsReference.removeValue()
         profileReference.child("lastSeenAt").setValue(ServerValue.TIMESTAMP)
     }
 
@@ -144,7 +140,7 @@ class ChatActivity : ConnectedActivity() {
 
             databaseReference
                     .child("chats")
-                    .child(intent.getStringExtra("chatKey"))
+                    .child(chatKey)
                     .child("messages")
                     .push()
                     .setValue(message)
@@ -159,7 +155,7 @@ class ChatActivity : ConnectedActivity() {
 
         val query = databaseReference
                 .child("chats")
-                .child(intent.getStringExtra("chatKey"))
+                .child(chatKey)
                 .child("messages")
                 .orderByKey()
         val parser = ClassSnapshotParser<Message>(Message::class.java)

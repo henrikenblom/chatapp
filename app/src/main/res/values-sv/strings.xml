@@ -23,4 +23,5 @@
     <string name="disconnected">Ej ansluten</string>
     <string name="last_seen_label">Senast sedd:</string>
     <string name="last_active">Senast aktiv:</string>
+    <string name="edit_chatlist">Redigera</string>
 </resources>

@@ -1,6 +1,6 @@
-import * as functions from "firebase-functions"
-import * as admin from "firebase-admin"
-import {ChatMessage, UserProfile} from "./declarations";
+import * as functions from "firebase-functions";
+import * as admin from "firebase-admin";
+import {ChatMessage, MediaChatMessage, UserProfile} from "./declarations";
 
 admin.initializeApp(functions.config().firebase);
 const YEAR_3000 = 3250368000000;
@@ -180,6 +180,35 @@ exports.cleanUpChat = functions.database.ref("/chats/{chatId}/members/{memberKey
         .remove();
 });
 
+exports.addMediaReference = functions.storage.object().onChange(event => {
+
+    const object = event.data; // The Storage object.
+
+    const filePath = object.name; // File path in the bucket.
+    const contentType = object.contentType; // File content type.
+    const resourceState = object.resourceState; // The resourceState is 'exists' or 'not_exists' (for file/folder deletions).
+    const metageneration = object.metageneration; // Number of times metadata has been generated. New objects have a value of 1.
+
+    if (!contentType.startsWith("image/")
+        || resourceState === "not_exists"
+        || (resourceState === "exists" && metageneration > 1)) {
+        return;
+    }
+
+    const pathArray = filePath.split("/");
+    const chatKey = pathArray[1];
+    const uid = pathArray[2];
+
+    const message = new MediaChatMessage(
+        uid,
+        admin.database.ServerValue.TIMESTAMP,
+        contentType,
+        filePath);
+
+    return admin.database().ref("chats").child(chatKey).child("messages").push(message);
+
+});
+
 const getAllProfiles = () => {
     return admin.database()
         .ref("userprofiles")
@@ -190,7 +219,7 @@ const getAllProfiles = () => {
         });
 };
 
-const getChatmembers = chatId => {
+const getChatmembers = (chatId: string) => {
     return admin.database()
         .ref("chats")
         .child(chatId)
@@ -202,7 +231,7 @@ const getChatmembers = chatId => {
         });
 };
 
-const getChatname = (chatId, uid) => {
+const getChatname = (chatId: string, uid: string) => {
     return admin.database()
         .ref("user_chats")
         .child(uid)
@@ -213,4 +242,5 @@ const getChatname = (chatId, uid) => {
         .then(snap => {
             return snap.val();
         });
+
 };

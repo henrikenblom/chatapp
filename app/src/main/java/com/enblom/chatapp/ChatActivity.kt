@@ -2,14 +2,17 @@ package com.enblom.chatapp
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import com.firebase.ui.database.ClassSnapshotParser
 import com.firebase.ui.database.FirebaseArray
 import com.firebase.ui.database.FirebaseRecyclerAdapter
 import com.google.firebase.database.*
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.android.synthetic.main.activity_chat.*
 import org.jetbrains.anko.sdk25.coroutines.onClick
+
 
 fun Context.ChatActivityIntent(chatKey: String, chatName: String): Intent {
     val intent = Intent(this, ChatActivity::class.java)
@@ -20,6 +23,7 @@ fun Context.ChatActivityIntent(chatKey: String, chatName: String): Intent {
 
 class ChatActivity : ConnectedActivity() {
 
+    private val GALLERY_REQUEST_CODE = 67
     private val TEN_MINUTES = 600000L
     private val databaseReference: DatabaseReference = FirebaseDatabase.getInstance().reference
     private val mLinearLayoutManager: LinearLayoutManager = LinearLayoutManager(this)
@@ -28,6 +32,7 @@ class ChatActivity : ConnectedActivity() {
     private val profileReference: DatabaseReference = firebaseDatabase
             .getReference("userprofiles")
             .child(currentUser?.uid)
+    private var storageRef = FirebaseStorage.getInstance().reference
     private var onDisconnectReference: OnDisconnect? = null
     private lateinit var userConnectionsReference: DatabaseReference
     private lateinit var chatKey: String
@@ -50,6 +55,12 @@ class ChatActivity : ConnectedActivity() {
 
         submitButton.onClick {
             submitMessage()
+        }
+
+        photoLibraryButton.onClick {
+            val intent = Intent(Intent.ACTION_PICK,
+                    android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+            startActivityForResult(intent, GALLERY_REQUEST_CODE)
         }
 
         userConnectionsReference = profileReference.child("connections").child(deviceId)
@@ -86,6 +97,37 @@ class ChatActivity : ConnectedActivity() {
                     }
 
                 })
+
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == GALLERY_REQUEST_CODE) {
+
+            if (data != null) {
+                addMedia(data.data)
+            }
+
+        }
+
+    }
+
+    private fun addMedia(uri: Uri) {
+
+        val mediaReference = storageRef
+                .child("media")
+                .child(chatKey)
+                .child(currentUser?.uid as String)
+                .child(uri.lastPathSegment)
+        val uploadTask = mediaReference.putFile(uri)
+
+        uploadTask.addOnFailureListener({
+            // Handle unsuccessful uploads
+        }).addOnSuccessListener({ taskSnapshot ->
+            // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
+        })
 
     }
 
@@ -192,7 +234,22 @@ class ChatActivity : ConnectedActivity() {
                 if (userProfiles.containsKey(message.postedBy))
                     photoUrl = userProfiles[message.postedBy]?.photoURL
 
-                viewHolder?.bind(message.text, photoUrl, ownMessage, imageDecoration, submittedAt)
+                val type = message.type
+                val path = message.path
+
+                if (type != null
+                        && type.startsWith("image")
+                        && path != null) {
+
+                    storageRef.child(path).downloadUrl.addOnCompleteListener {
+                        if (it.isSuccessful) {
+                            viewHolder?.bindImageMessage(it.result, photoUrl, ownMessage, imageDecoration, submittedAt)
+                        }
+                    }
+
+                } else {
+                    viewHolder?.bindTextMessage(message.text, photoUrl, ownMessage, imageDecoration, submittedAt)
+                }
 
             }
 

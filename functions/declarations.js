@@ -1,18 +1,27 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", {value: true});
-var UserProfile = (function () {
-    function UserProfile(firebaseUser) {
+
+class UserProfile {
+    constructor(firebaseUser) {
         this.displayName = firebaseUser.displayName;
         this.email = firebaseUser.email;
         this.photoURL = firebaseUser.photoURL;
         this.uid = firebaseUser.uid;
     }
-    return UserProfile;
-}());
+}
 exports.UserProfile = UserProfile;
-var ChatMessage = (function () {
-    function ChatMessage() {
-    }
-    return ChatMessage;
-}());
+
+class ChatMessage {
+}
 exports.ChatMessage = ChatMessage;
+
+class MediaChatMessage {
+    constructor(postedBy, submittedAt, type, path) {
+        this.postedBy = postedBy;
+        this.submittedAt = submittedAt;
+        this.type = type;
+        this.path = path;
+    }
+}
+
+exports.MediaChatMessage = MediaChatMessage;

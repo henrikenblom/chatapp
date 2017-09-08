@@ -25,3 +25,19 @@ export class ChatMessage {
     text: string;
 
 }
+
+export class MediaChatMessage {
+
+    postedBy: string;
+    submittedAt: number;
+    type: string;
+    path: string;
+
+
+    constructor(postedBy: string, submittedAt: number, type: string, path: string) {
+        this.postedBy = postedBy;
+        this.submittedAt = submittedAt;
+        this.type = type;
+        this.path = path;
+    }
+}

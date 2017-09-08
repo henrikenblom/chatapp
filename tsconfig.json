@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "outDir": "./functions",
+    "noImplicitAny": true,
+    "strictNullChecks": false
+  },
+  "include": [
+    "functions/**/*.ts"
+  ],
+  "exclude": [
+    "functions/node_modules"
+  ]
+}

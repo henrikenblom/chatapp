@@ -1,27 +1,27 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", {value: true});
-var functions = require("firebase-functions");
-var admin = require("firebase-admin");
-var declarations_1 = require("./declarations");
+const functions = require("firebase-functions");
+const admin = require("firebase-admin");
+const declarations_1 = require("./declarations");
 admin.initializeApp(functions.config().firebase);
-var YEAR_3000 = 3250368000000;
-exports.setupNewUser = functions.auth.user().onCreate(function (event) {
-    var reference = admin.database().ref("/userprofiles/" + event.data.uid + "/");
-    var userProfile = new declarations_1.UserProfile(event.data);
+const YEAR_3000 = 3250368000000;
+exports.setupNewUser = functions.auth.user().onCreate(event => {
+    const reference = admin.database().ref("/userprofiles/" + event.data.uid + "/");
+    const userProfile = new declarations_1.UserProfile(event.data);
     userProfile.createdAt = admin.database.ServerValue.TIMESTAMP;
     return reference.set(userProfile);
 });
-exports.setupNewChat = functions.database.ref("/chats/{chatId}").onCreate(function (event) {
-    var timestamp = admin.database.ServerValue.TIMESTAMP;
-    getAllProfiles().then(function (data) {
-        var userProfiles = data.userProfiles;
-        getChatmembers(event.params.chatId).then(function (data) {
-            var members = data.members;
-            var isGroupChat = Object.keys(members).length > 2;
-            for (var memberKey in members) {
-                var chatName = [];
-                var memberPhotos = [];
-                for (var profileKey in userProfiles) {
+exports.setupNewChat = functions.database.ref("/chats/{chatId}").onCreate(event => {
+    const timestamp = admin.database.ServerValue.TIMESTAMP;
+    getAllProfiles().then(data => {
+        const userProfiles = data.userProfiles;
+        getChatmembers(event.params.chatId).then(data => {
+            const members = data.members;
+            const isGroupChat = Object.keys(members).length > 2;
+            for (let memberKey in members) {
+                let chatName = [];
+                let memberPhotos = [];
+                for (let profileKey in userProfiles) {
                     if (profileKey in members
                         && profileKey != memberKey) {
                         chatName.push(userProfiles[profileKey].displayName);
@@ -46,8 +46,7 @@ exports.setupNewChat = functions.database.ref("/chats/{chatId}").onCreate(functi
                     .child(event.params.chatId)
                     .child("lastMessageAt")
                     .set(timestamp);
-                for (var _i = 0, memberPhotos_1 = memberPhotos; _i < memberPhotos_1.length; _i++) {
-                    var photo = memberPhotos_1[_i];
+                for (let photo of memberPhotos) {
                     admin.database()
                         .ref("user_chats")
                         .child(memberKey)
@@ -60,13 +59,13 @@ exports.setupNewChat = functions.database.ref("/chats/{chatId}").onCreate(functi
     });
     return event.data.ref.child("createdAt").set(timestamp);
 });
-exports.updateChatMessageTimestamps = functions.database.ref("/chats/{chatId}/messages/{messageId}").onCreate(function (event) {
-    getChatmembers(event.params.chatId).then(function (data) {
-        var timestamp = new Date().getTime();
-        var members = data.members;
-        var groupChat = Object.keys(members).length > 2;
-        for (var memberKey in members) {
-            var orderBy = YEAR_3000 - timestamp;
+exports.updateChatMessageTimestamps = functions.database.ref("/chats/{chatId}/messages/{messageId}").onCreate(event => {
+    getChatmembers(event.params.chatId).then(data => {
+        const timestamp = new Date().getTime();
+        const members = data.members;
+        const groupChat = Object.keys(members).length > 2;
+        for (let memberKey in members) {
+            let orderBy = YEAR_3000 - timestamp;
             admin.database()
                 .ref("user_chats")
                 .child(memberKey)
@@ -89,18 +88,18 @@ exports.updateChatMessageTimestamps = functions.database.ref("/chats/{chatId}/me
     });
     return event.data.ref.child("submittedAt").set(admin.database.ServerValue.TIMESTAMP);
 });
-exports.sendMessageNotifications = functions.database.ref("/chats/{chatId}/messages/{messageId}").onCreate(function (event) {
-    var message = event.data.val();
-    getAllProfiles().then(function (data) {
-        var userProfiles = data.userProfiles;
-        getChatmembers(event.params.chatId).then(function (data) {
-            var members = data.members;
-            var _loop_1 = function (memberKey) {
+exports.sendMessageNotifications = functions.database.ref("/chats/{chatId}/messages/{messageId}").onCreate(event => {
+    const message = event.data.val();
+    getAllProfiles().then(data => {
+        const userProfiles = data.userProfiles;
+        getChatmembers(event.params.chatId).then(data => {
+            const members = data.members;
+            for (let memberKey in members) {
                 if (message.postedBy != memberKey) {
-                    var tokens_1 = userProfiles[memberKey].notificationTokens;
-                    getChatname(event.params.chatId, memberKey).then(function (chatName) {
-                        for (var tokenId in tokens_1) {
-                            var payload = {
+                    const tokens = userProfiles[memberKey].notificationTokens;
+                    getChatname(event.params.chatId, memberKey).then(chatName => {
+                        for (let tokenId in tokens) {
+                            const payload = {
                                 notification: {
                                     title: userProfiles[message.postedBy].displayName,
                                     body: message.text,
@@ -112,45 +111,59 @@ exports.sendMessageNotifications = functions.database.ref("/chats/{chatId}/messa
                                     chatName: chatName
                                 }
                             };
-                            admin.messaging().sendToDevice(tokens_1[tokenId], payload);
+                            admin.messaging().sendToDevice(tokens[tokenId], payload);
                         }
                     });
                 }
-            };
-            for (var memberKey in members) {
-                _loop_1(memberKey);
             }
         });
     });
 });
-exports.cleanUpChat = functions.database.ref("/chats/{chatId}/members/{memberKey}").onDelete(function (event) {
+exports.cleanUpChat = functions.database.ref("/chats/{chatId}/members/{memberKey}").onDelete(event => {
     return admin.database()
         .ref("user_chats")
         .child(event.params.memberKey)
         .child(event.params.chatId)
         .remove();
 });
-var getAllProfiles = function () {
+exports.addMediaReference = functions.storage.object().onChange(event => {
+    const object = event.data; // The Storage object.
+    const filePath = object.name; // File path in the bucket.
+    const contentType = object.contentType; // File content type.
+    const resourceState = object.resourceState; // The resourceState is 'exists' or 'not_exists' (for file/folder deletions).
+    const metageneration = object.metageneration; // Number of times metadata has been generated. New objects have a value of 1.
+    if (!contentType.startsWith("image/")
+        || resourceState === "not_exists"
+        || (resourceState === "exists" && metageneration > 1)) {
+        return;
+    }
+    const pathArray = filePath.split("/");
+    const chatKey = pathArray[1];
+    const uid = pathArray[2];
+    const message = new declarations_1.MediaChatMessage(uid, admin.database.ServerValue.TIMESTAMP, contentType, filePath);
+    return admin.database().ref("chats").child(chatKey).child("messages").push(message);
+});
+const getAllProfiles = () => {
     return admin.database()
         .ref("userprofiles")
         .orderByKey()
         .once("value")
-        .then(function (snap) {
+        .then(snap => {
             return {userProfiles: snap.val()};
         });
 };
-var getChatmembers = function (chatId) {
+const getChatmembers = (chatId) => {
     return admin.database()
         .ref("chats")
         .child(chatId)
         .child("members")
         .orderByKey()
         .once("value")
-        .then(function (snap) {
+        .then(snap => {
             return {members: snap.val()};
         });
 };
-var getChatname = function (chatId, uid) {
+const getChatname = (chatId, uid) => {
     return admin.database()
         .ref("user_chats")
         .child(uid)
@@ -158,7 +171,7 @@ var getChatname = function (chatId, uid) {
         .child("chat_name")
         .orderByKey()
         .once("value")
-        .then(function (snap) {
+        .then(snap => {
             return snap.val();
         });
 };

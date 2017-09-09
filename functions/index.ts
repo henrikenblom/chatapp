@@ -1,6 +1,6 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
-import {ChatMessage, MediaChatMessage, UserProfile} from "./declarations";
+import {ChatMessage, UserProfile} from "./declarations";
 
 admin.initializeApp(functions.config().firebase);
 const YEAR_3000 = 3250368000000;
@@ -143,10 +143,11 @@ exports.sendMessageNotifications = functions.database.ref("/chats/{chatId}/messa
 
                         for (let tokenId in tokens) {
 
-                            const payload = {
+                            let payload = {
                                 notification: {
                                     title: userProfiles[message.postedBy].displayName,
-                                    body: message.text,
+                                    body_loc_key: "not_text_notification",
+                                    body: "",
                                     sound: "chatapp_notice",
                                     click_action: "ACTIVITY_CHAT"
                                 },
@@ -155,6 +156,16 @@ exports.sendMessageNotifications = functions.database.ref("/chats/{chatId}/messa
                                     chatName: chatName
                                 }
                             };
+
+                            if (message.type == null) {
+
+                                payload.notification.body = message.text;
+
+                            } else if (message.type.endsWith("gif")) {
+
+                                payload.notification.body_loc_key = "gif_notification";
+
+                            }
 
                             admin.messaging().sendToDevice(tokens[tokenId], payload);
 
@@ -199,13 +210,13 @@ exports.addMediaReference = functions.storage.object().onChange(event => {
     const chatKey = pathArray[1];
     const uid = pathArray[2];
 
-    const message = new MediaChatMessage(
+    const message = new ChatMessage(
         uid,
         admin.database.ServerValue.TIMESTAMP,
         contentType,
         filePath);
 
-    return admin.database().ref("chats").child(chatKey).child("messages").push(message);
+    admin.database().ref("chats").child(chatKey).child("messages").push(message);
 
 });
 

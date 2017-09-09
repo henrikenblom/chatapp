@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
+import android.view.View
 import com.firebase.ui.database.ClassSnapshotParser
 import com.firebase.ui.database.FirebaseArray
 import com.firebase.ui.database.FirebaseRecyclerAdapter
@@ -52,6 +53,8 @@ class ChatActivity : ConnectedActivity() {
         supportActionBar?.setDisplayShowHomeEnabled(true)
         supportActionBar?.setDisplayShowTitleEnabled(true)
         supportActionBar?.title = chatName
+
+        editText.parent = this
 
         submitButton.onClick {
             submitMessage()
@@ -107,27 +110,10 @@ class ChatActivity : ConnectedActivity() {
         if (requestCode == GALLERY_REQUEST_CODE) {
 
             if (data != null) {
-                addMedia(data.data)
+                submitMedia(data.data)
             }
 
         }
-
-    }
-
-    private fun addMedia(uri: Uri) {
-
-        val mediaReference = storageRef
-                .child("media")
-                .child(chatKey)
-                .child(currentUser?.uid as String)
-                .child(uri.lastPathSegment)
-        val uploadTask = mediaReference.putFile(uri)
-
-        uploadTask.addOnFailureListener({
-            // Handle unsuccessful uploads
-        }).addOnSuccessListener({ taskSnapshot ->
-            // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
-        })
 
     }
 
@@ -167,6 +153,32 @@ class ChatActivity : ConnectedActivity() {
 
     override fun getParentActivityIntent(): Intent {
         return MainActivityIntent()
+    }
+
+    fun submitMedia(uri: Uri) {
+
+        val mediaReference = storageRef
+                .child("media")
+                .child(chatKey)
+                .child(currentUser?.uid as String)
+                .child(uri.hashCode().toString(16))
+        val uploadTask = mediaReference.putFile(uri)
+
+        uploadProgressBar.visibility = View.VISIBLE
+
+        uploadTask.addOnProgressListener {
+            uploadProgressBar.progress = (100f * (it.bytesTransferred / it.totalByteCount.toDouble())).toInt()
+        }
+
+        uploadTask.addOnCompleteListener {
+            uploadProgressBar.visibility = View.GONE
+        }
+
+        uploadTask.addOnFailureListener({
+        }).addOnSuccessListener({ taskSnapshot ->
+            // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
+        })
+
     }
 
     private fun submitMessage() {
@@ -241,11 +253,7 @@ class ChatActivity : ConnectedActivity() {
                         && type.startsWith("image")
                         && path != null) {
 
-                    storageRef.child(path).downloadUrl.addOnCompleteListener {
-                        if (it.isSuccessful) {
-                            viewHolder?.bindImageMessage(it.result, photoUrl, ownMessage, imageDecoration, submittedAt)
-                        }
-                    }
+                    viewHolder?.bindImageMessage(storageRef.child(path), photoUrl, ownMessage, imageDecoration, submittedAt)
 
                 } else {
                     viewHolder?.bindTextMessage(message.text, photoUrl, ownMessage, imageDecoration, submittedAt)

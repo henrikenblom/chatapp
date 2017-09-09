@@ -28,4 +28,6 @@
     <string name="no">Nej</string>
     <string name="yes">Ja</string>
     <string name="really_delete_chat">Är du säker på att du vill radera chatten?</string>
+    <string name="not_text_notification">Nytt bildmeddelande</string>
+    <string name="gif_notification">Ny GIF</string>
 </resources>

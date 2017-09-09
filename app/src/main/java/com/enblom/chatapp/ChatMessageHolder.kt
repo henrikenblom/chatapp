@@ -10,9 +10,13 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import com.bumptech.glide.Glide
+import com.firebase.ui.storage.images.FirebaseImageLoader
 import com.github.curioustechizen.ago.RelativeTimeTextView
+import com.google.firebase.storage.StorageReference
 import com.makeramen.roundedimageview.RoundedTransformationBuilder
 import com.squareup.picasso.Picasso
+
 
 class ChatMessageHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
@@ -29,7 +33,7 @@ class ChatMessageHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         ME, OTHER, NONE
     }
 
-    fun bindImageMessage(imageUri: Uri, photoUrl: String? = null, ownMessage: Boolean, imageDecoration: ImageDecoration, messageTime: Long?) {
+    fun bindImageMessage(storageReference: StorageReference, photoUrl: String? = null, ownMessage: Boolean, imageDecoration: ImageDecoration, messageTime: Long?) {
 
         messageTextView?.visibility = View.GONE
 
@@ -63,8 +67,12 @@ class ChatMessageHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
             }
         }
 
+        Glide.with(itemView.context)
+                .using(FirebaseImageLoader())
+                .load(storageReference)
+                .into(inlineImageView)
+
         inlineImageView?.visibility = View.VISIBLE
-        inlineImageView?.loadUri(imageUri)
 
     }
 

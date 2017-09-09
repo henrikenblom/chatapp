@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", {value: true});
-
 class UserProfile {
     constructor(firebaseUser) {
         this.displayName = firebaseUser.displayName;
@@ -10,13 +9,9 @@ class UserProfile {
     }
 }
 exports.UserProfile = UserProfile;
-
 class ChatMessage {
-}
-exports.ChatMessage = ChatMessage;
-
-class MediaChatMessage {
     constructor(postedBy, submittedAt, type, path) {
+        this.type = "text";
         this.postedBy = postedBy;
         this.submittedAt = submittedAt;
         this.type = type;
@@ -24,4 +19,4 @@ class MediaChatMessage {
     }
 }
 
-exports.MediaChatMessage = MediaChatMessage;
+exports.ChatMessage = ChatMessage;

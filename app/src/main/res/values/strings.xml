@@ -33,4 +33,6 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="really_delete_chat">Are you sure you want do delete this chat?</string>
+    <string name="not_text_notification">New image message</string>
+    <string name="gif_notification">New GIF</string>
 </resources>

@@ -23,16 +23,8 @@ export class ChatMessage {
     postedBy: string;
     submittedAt: number;
     text: string;
-
-}
-
-export class MediaChatMessage {
-
-    postedBy: string;
-    submittedAt: number;
-    type: string;
+    type: string = "text";
     path: string;
-
 
     constructor(postedBy: string, submittedAt: number, type: string, path: string) {
         this.postedBy = postedBy;
@@ -40,4 +32,5 @@ export class MediaChatMessage {
         this.type = type;
         this.path = path;
     }
+
 }

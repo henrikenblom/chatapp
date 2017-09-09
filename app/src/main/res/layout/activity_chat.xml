@@ -25,20 +25,25 @@
             android:id="@+id/chatMessageView"
             app:layout_constraintHorizontal_bias="0.0"
             tools:listitem="@layout/chat_message"
-            app:layout_constraintBottom_toTopOf="@+id/editBar"
             android:layout_height="0dp"
-            android:layout_marginTop="0dp"
             app:layout_constraintTop_toBottomOf="@+id/chatToolbar"
-            android:layout_marginBottom="0dp"
-            app:layout_constraintVertical_bias="0.0"/>
+            app:layout_constraintBottom_toTopOf="@+id/editBar"/>
 
+    <ProgressBar
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="0dp"
+            android:layout_height="2dp"
+            android:id="@+id/uploadProgressBar"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/editBar" android:visibility="gone"/>
     <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintRight_toRightOf="parent" app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             android:background="@color/light_chatapp" android:id="@+id/editBar" android:elevation="4dp"
-            app:layout_constraintHorizontal_bias="1.0" android:layout_marginBottom="0dp"
+            app:layout_constraintHorizontal_bias="1.0"
     >
         <ImageButton
                 android:layout_width="40dp"
@@ -58,7 +63,7 @@
                 android:layout_gravity="bottom|end" android:background="@android:color/transparent"
                 android:layout_marginStart="4dp" android:layout_marginBottom="4dp"
                 android:layout_marginTop="4dp"/>
-        <EditText
+        <com.enblom.chatapp.EnrichedEditText
                 android:layout_height="40dp"
                 android:inputType="textCapSentences|textMultiLine"
                 android:ems="10"

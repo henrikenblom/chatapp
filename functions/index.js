@@ -1,5 +1,5 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", {value: true});
+Object.defineProperty(exports, "__esModule", { value: true });
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const declarations_1 = require("./declarations");
@@ -99,10 +99,11 @@ exports.sendMessageNotifications = functions.database.ref("/chats/{chatId}/messa
                     const tokens = userProfiles[memberKey].notificationTokens;
                     getChatname(event.params.chatId, memberKey).then(chatName => {
                         for (let tokenId in tokens) {
-                            const payload = {
+                            let payload = {
                                 notification: {
                                     title: userProfiles[message.postedBy].displayName,
-                                    body: message.text,
+                                    body_loc_key: "not_text_notification",
+                                    body: "",
                                     sound: "chatapp_notice",
                                     click_action: "ACTIVITY_CHAT"
                                 },
@@ -111,6 +112,12 @@ exports.sendMessageNotifications = functions.database.ref("/chats/{chatId}/messa
                                     chatName: chatName
                                 }
                             };
+                            if (message.type == null) {
+                                payload.notification.body = message.text;
+                            }
+                            else if (message.type.endsWith("gif")) {
+                                payload.notification.body_loc_key = "gif_notification";
+                            }
                             admin.messaging().sendToDevice(tokens[tokenId], payload);
                         }
                     });
@@ -140,8 +147,8 @@ exports.addMediaReference = functions.storage.object().onChange(event => {
     const pathArray = filePath.split("/");
     const chatKey = pathArray[1];
     const uid = pathArray[2];
-    const message = new declarations_1.MediaChatMessage(uid, admin.database.ServerValue.TIMESTAMP, contentType, filePath);
-    return admin.database().ref("chats").child(chatKey).child("messages").push(message);
+    const message = new declarations_1.ChatMessage(uid, admin.database.ServerValue.TIMESTAMP, contentType, filePath);
+    admin.database().ref("chats").child(chatKey).child("messages").push(message);
 });
 const getAllProfiles = () => {
     return admin.database()
@@ -149,8 +156,8 @@ const getAllProfiles = () => {
         .orderByKey()
         .once("value")
         .then(snap => {
-            return {userProfiles: snap.val()};
-        });
+        return { userProfiles: snap.val() };
+    });
 };
 const getChatmembers = (chatId) => {
     return admin.database()
@@ -160,8 +167,8 @@ const getChatmembers = (chatId) => {
         .orderByKey()
         .once("value")
         .then(snap => {
-            return {members: snap.val()};
-        });
+        return { members: snap.val() };
+    });
 };
 const getChatname = (chatId, uid) => {
     return admin.database()
@@ -172,6 +179,6 @@ const getChatname = (chatId, uid) => {
         .orderByKey()
         .once("value")
         .then(snap => {
-            return snap.val();
-        });
+        return snap.val();
+    });
 };

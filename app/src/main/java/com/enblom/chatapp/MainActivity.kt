@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.NavigationView
+import android.support.v13.app.ActivityCompat
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBarDrawerToggle
@@ -33,6 +34,7 @@ fun Context.MainActivityIntent(): Intent {
 
 class MainActivity : ConnectedActivity(), NavigationView.OnNavigationItemSelectedListener {
 
+    val MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 10
     val databaseReference: DatabaseReference = FirebaseDatabase.getInstance().reference
     val userProfileParser = ClassSnapshotParser<UserProfile>(UserProfile::class.java)
     private val mLinearLayoutManager: LinearLayoutManager = LinearLayoutManager(this)
@@ -71,6 +73,10 @@ class MainActivity : ConnectedActivity(), NavigationView.OnNavigationItemSelecte
 
         val navigationView = findViewById(R.id.nav_view) as NavigationView
         navigationView.setNavigationItemSelectedListener(this)
+
+        ActivityCompat.requestPermissions(this,
+                arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),
+                MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE)
 
         verifyCredentials()
 

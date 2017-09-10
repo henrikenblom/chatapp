@@ -4,9 +4,14 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
+import android.provider.MediaStore
+import android.support.v4.content.FileProvider
 import android.support.v7.widget.LinearLayoutManager
+import android.util.Log
 import android.view.View
 import com.firebase.ui.database.ClassSnapshotParser
 import com.firebase.ui.database.FirebaseArray
@@ -17,6 +22,9 @@ import com.google.firebase.storage.UploadTask
 import kotlinx.android.synthetic.main.activity_chat.*
 import org.jetbrains.anko.sdk25.coroutines.onClick
 import java.io.ByteArrayOutputStream
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 fun Context.ChatActivityIntent(chatKey: String, chatName: String): Intent {
@@ -31,6 +39,7 @@ class ChatActivity : ConnectedActivity() {
     private val MAX_BITMAP_SIZE_TARGET: Double = 1200.0
     private val IMAGE_QUALITY = 45
     private val GALLERY_REQUEST_CODE = 6711
+    private val REQUEST_IMAGE_CAPTURE_CODE = 6712
     private val TEN_MINUTES = 600000L
     private val databaseReference: DatabaseReference = FirebaseDatabase.getInstance().reference
     private val mLinearLayoutManager: LinearLayoutManager = LinearLayoutManager(this)
@@ -44,12 +53,15 @@ class ChatActivity : ConnectedActivity() {
     private lateinit var userConnectionsReference: DatabaseReference
     private lateinit var chatKey: String
     private lateinit var chatName: String
+    private lateinit var currentContext: Context
+    private var photoFile: File? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
 
+        currentContext = this
         chatKey = intent.getStringExtra("chatKey")
         chatName = intent.getStringExtra("chatName")
 
@@ -70,6 +82,19 @@ class ChatActivity : ConnectedActivity() {
             val intent = Intent(Intent.ACTION_PICK,
                     android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
             startActivityForResult(intent, GALLERY_REQUEST_CODE)
+        }
+
+        cameraButton.onClick {
+            val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+            if (takePictureIntent.resolveActivity(packageManager) != null) {
+                photoFile = createImageFile()
+                val photoURI = FileProvider.getUriForFile(applicationContext,
+                        "com.enblom.chatapp",
+                        photoFile)
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
+                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE_CODE)
+
+            }
         }
 
         userConnectionsReference = profileReference.child("connections").child(deviceId)
@@ -114,12 +139,14 @@ class ChatActivity : ConnectedActivity() {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == GALLERY_REQUEST_CODE) {
-
             if (data != null) {
                 monitorUploadTask(submitImage(data.data))
             }
-
-        }
+        } else if (requestCode == REQUEST_IMAGE_CAPTURE_CODE) {
+            MediaScannerConnection.scanFile(this, arrayOf(photoFile.toString()), null) { path, contentUri ->
+                monitorUploadTask(submitImage(contentUri))
+            }
+            }
 
     }
 
@@ -162,8 +189,9 @@ class ChatActivity : ConnectedActivity() {
     }
 
     private fun submitImage(uri: Uri): UploadTask {
-
+        Log.d("IMAGE_CAPTURE", "$uri")
         val bitmap = getBitmap(uri)
+        Log.d("IMAGE_CAPTURE", "${bitmap?.height}")
         val baos = ByteArrayOutputStream()
         bitmap?.compress(Bitmap.CompressFormat.JPEG, IMAGE_QUALITY, baos)
         val mediaReference = storageRef
@@ -198,6 +226,9 @@ class ChatActivity : ConnectedActivity() {
 
         uploadTask.addOnProgressListener {
             uploadProgressBar.progress = (100f * (it.bytesTransferred / it.totalByteCount.toDouble())).toInt()
+            if (uploadProgressBar.progress == 100) {
+                uploadProgressBar.visibility = View.GONE
+            }
         }
 
         uploadTask.addOnCompleteListener {
@@ -205,7 +236,9 @@ class ChatActivity : ConnectedActivity() {
         }
 
         uploadTask.addOnFailureListener({
+            uploadProgressBar.visibility = View.GONE
         }).addOnSuccessListener({ taskSnapshot ->
+            uploadProgressBar.visibility = View.GONE
             // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
         })
 
@@ -300,9 +333,22 @@ class ChatActivity : ConnectedActivity() {
 
     }
 
+    private fun createImageFile(): File {
+        // Create an image file name
+        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
+        val imageFileName = "JPEG_" + timeStamp + "_"
+        val storageDir = this.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        val image = File.createTempFile(
+                imageFileName, /* prefix */
+                ".jpg", /* suffix */
+                storageDir      /* directory */
+        )
+        return image
+    }
+
     private fun getBitmap(uri: Uri): Bitmap? {
 
-        var input = this.contentResolver.openInputStream(uri)
+        var input = contentResolver.openInputStream(uri)
 
         val onlyBoundsOptions = BitmapFactory.Options()
         onlyBoundsOptions.inJustDecodeBounds = true
@@ -321,7 +367,7 @@ class ChatActivity : ConnectedActivity() {
         val bitmapOptions = BitmapFactory.Options()
         bitmapOptions.inSampleSize = getPowerOfTwoForSampleRatio(ratio)
         bitmapOptions.inPreferredConfig = Bitmap.Config.ARGB_8888//
-        input = this.contentResolver.openInputStream(uri)
+        input = contentResolver.openInputStream(uri)
         val bitmap = BitmapFactory.decodeStream(input, null, bitmapOptions)
         input.close()
         return bitmap

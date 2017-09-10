@@ -2,6 +2,8 @@ package com.enblom.chatapp
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
@@ -11,8 +13,10 @@ import com.firebase.ui.database.FirebaseArray
 import com.firebase.ui.database.FirebaseRecyclerAdapter
 import com.google.firebase.database.*
 import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.UploadTask
 import kotlinx.android.synthetic.main.activity_chat.*
 import org.jetbrains.anko.sdk25.coroutines.onClick
+import java.io.ByteArrayOutputStream
 
 
 fun Context.ChatActivityIntent(chatKey: String, chatName: String): Intent {
@@ -24,6 +28,8 @@ fun Context.ChatActivityIntent(chatKey: String, chatName: String): Intent {
 
 class ChatActivity : ConnectedActivity() {
 
+    private val MAX_BITMAP_SIZE: Double = 1920.0
+    private val IMAGE_QUALITY = 80
     private val GALLERY_REQUEST_CODE = 67
     private val TEN_MINUTES = 600000L
     private val databaseReference: DatabaseReference = FirebaseDatabase.getInstance().reference
@@ -110,7 +116,7 @@ class ChatActivity : ConnectedActivity() {
         if (requestCode == GALLERY_REQUEST_CODE) {
 
             if (data != null) {
-                submitMedia(data.data)
+                monitorUploadTask(submitImage(data.data))
             }
 
         }
@@ -155,14 +161,34 @@ class ChatActivity : ConnectedActivity() {
         return MainActivityIntent()
     }
 
-    fun submitMedia(uri: Uri) {
+    private fun submitImage(uri: Uri): UploadTask {
+
+        val bitmap = getBitmap(uri)
+        val baos = ByteArrayOutputStream()
+        bitmap?.compress(Bitmap.CompressFormat.JPEG, IMAGE_QUALITY, baos)
+        val mediaReference = storageRef
+                .child("media")
+                .child(chatKey)
+                .child(currentUser?.uid as String)
+                .child(uri.hashCode().toString(16))
+
+        return mediaReference.putBytes(baos.toByteArray())
+
+    }
+
+    fun submitMedia(uri: Uri): UploadTask {
 
         val mediaReference = storageRef
                 .child("media")
                 .child(chatKey)
                 .child(currentUser?.uid as String)
                 .child(uri.hashCode().toString(16))
-        val uploadTask = mediaReference.putFile(uri)
+
+        return mediaReference.putFile(uri)
+
+    }
+
+    fun monitorUploadTask(uploadTask: UploadTask) {
 
         uploadProgressBar.visibility = View.VISIBLE
 
@@ -268,6 +294,41 @@ class ChatActivity : ConnectedActivity() {
 
         }
 
+    }
+
+    fun getBitmap(uri: Uri): Bitmap? {
+
+        var input = this.contentResolver.openInputStream(uri)
+
+        val onlyBoundsOptions = BitmapFactory.Options()
+        onlyBoundsOptions.inJustDecodeBounds = true
+        onlyBoundsOptions.inPreferredConfig = Bitmap.Config.ARGB_8888//optional
+        BitmapFactory.decodeStream(input, null, onlyBoundsOptions)
+        input.close()
+
+        if (onlyBoundsOptions.outWidth == -1 || onlyBoundsOptions.outHeight == -1) {
+            return null
+        }
+
+        val originalSize = if (onlyBoundsOptions.outHeight > onlyBoundsOptions.outWidth) onlyBoundsOptions.outHeight else onlyBoundsOptions.outWidth
+
+        val ratio = if (originalSize > MAX_BITMAP_SIZE) originalSize / MAX_BITMAP_SIZE else 1.0
+
+        val bitmapOptions = BitmapFactory.Options()
+        bitmapOptions.inSampleSize = getPowerOfTwoForSampleRatio(ratio)
+        bitmapOptions.inPreferredConfig = Bitmap.Config.ARGB_8888//
+        input = this.contentResolver.openInputStream(uri)
+        val bitmap = BitmapFactory.decodeStream(input, null, bitmapOptions)
+        input.close()
+        return bitmap
+    }
+
+    private fun getPowerOfTwoForSampleRatio(ratio: Double): Int {
+        val k = Integer.highestOneBit(Math.floor(ratio).toInt())
+        return if (k == 0)
+            1
+        else
+            k
     }
 
 }

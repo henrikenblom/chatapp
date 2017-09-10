@@ -39,7 +39,7 @@ class EnrichedEditText : EditText {
             Log.e("RICH_CONTENT", "${inputContentInfo.contentUri}")
 
             if (parent != null) {
-                parent.submitMedia(inputContentInfo.contentUri)
+                parent.monitorUploadTask(parent.submitMedia(inputContentInfo.contentUri))
             }
 
             inputContentInfo.releasePermission()

@@ -28,9 +28,9 @@ fun Context.ChatActivityIntent(chatKey: String, chatName: String): Intent {
 
 class ChatActivity : ConnectedActivity() {
 
-    private val MAX_BITMAP_SIZE: Double = 1920.0
-    private val IMAGE_QUALITY = 80
-    private val GALLERY_REQUEST_CODE = 67
+    private val MAX_BITMAP_SIZE_TARGET: Double = 1200.0
+    private val IMAGE_QUALITY = 45
+    private val GALLERY_REQUEST_CODE = 6711
     private val TEN_MINUTES = 600000L
     private val databaseReference: DatabaseReference = FirebaseDatabase.getInstance().reference
     private val mLinearLayoutManager: LinearLayoutManager = LinearLayoutManager(this)
@@ -172,7 +172,11 @@ class ChatActivity : ConnectedActivity() {
                 .child(currentUser?.uid as String)
                 .child(uri.hashCode().toString(16))
 
-        return mediaReference.putBytes(baos.toByteArray())
+        val uploadTask = mediaReference.putBytes(baos.toByteArray())
+        bitmap?.recycle()
+        baos.close()
+
+        return uploadTask
 
     }
 
@@ -296,7 +300,7 @@ class ChatActivity : ConnectedActivity() {
 
     }
 
-    fun getBitmap(uri: Uri): Bitmap? {
+    private fun getBitmap(uri: Uri): Bitmap? {
 
         var input = this.contentResolver.openInputStream(uri)
 
@@ -312,7 +316,7 @@ class ChatActivity : ConnectedActivity() {
 
         val originalSize = if (onlyBoundsOptions.outHeight > onlyBoundsOptions.outWidth) onlyBoundsOptions.outHeight else onlyBoundsOptions.outWidth
 
-        val ratio = if (originalSize > MAX_BITMAP_SIZE) originalSize / MAX_BITMAP_SIZE else 1.0
+        val ratio = if (originalSize > MAX_BITMAP_SIZE_TARGET) originalSize / MAX_BITMAP_SIZE_TARGET else 1.0
 
         val bitmapOptions = BitmapFactory.Options()
         bitmapOptions.inSampleSize = getPowerOfTwoForSampleRatio(ratio)

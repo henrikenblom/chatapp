@@ -11,7 +11,6 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.support.v4.content.FileProvider
 import android.support.v7.widget.LinearLayoutManager
-import android.util.Log
 import android.view.View
 import com.firebase.ui.database.ClassSnapshotParser
 import com.firebase.ui.database.FirebaseArray
@@ -144,9 +143,9 @@ class ChatActivity : ConnectedActivity() {
             }
         } else if (requestCode == REQUEST_IMAGE_CAPTURE_CODE) {
             MediaScannerConnection.scanFile(this, arrayOf(photoFile.toString()), null) { path, contentUri ->
-                monitorUploadTask(submitImage(contentUri))
+                monitorUploadTask(submitImage(contentUri), this::deleteImageFile)
             }
-            }
+        }
 
     }
 
@@ -189,9 +188,8 @@ class ChatActivity : ConnectedActivity() {
     }
 
     private fun submitImage(uri: Uri): UploadTask {
-        Log.d("IMAGE_CAPTURE", "$uri")
+
         val bitmap = getBitmap(uri)
-        Log.d("IMAGE_CAPTURE", "${bitmap?.height}")
         val baos = ByteArrayOutputStream()
         bitmap?.compress(Bitmap.CompressFormat.JPEG, IMAGE_QUALITY, baos)
         val mediaReference = storageRef
@@ -200,11 +198,10 @@ class ChatActivity : ConnectedActivity() {
                 .child(currentUser?.uid as String)
                 .child(uri.hashCode().toString(16))
 
-        val uploadTask = mediaReference.putBytes(baos.toByteArray())
-        bitmap?.recycle()
         baos.close()
+        bitmap?.recycle()
 
-        return uploadTask
+        return mediaReference.putBytes(baos.toByteArray())
 
     }
 
@@ -220,27 +217,26 @@ class ChatActivity : ConnectedActivity() {
 
     }
 
-    fun monitorUploadTask(uploadTask: UploadTask) {
+    fun monitorUploadTask(uploadTask: UploadTask, callback: () -> Unit = {}) {
 
-        uploadProgressBar.visibility = View.VISIBLE
+        runOnUiThread {
 
-        uploadTask.addOnProgressListener {
-            uploadProgressBar.progress = (100f * (it.bytesTransferred / it.totalByteCount.toDouble())).toInt()
-            if (uploadProgressBar.progress == 100) {
-                uploadProgressBar.visibility = View.GONE
+            if (uploadTask.isInProgress) {
+
+                uploadProgressBar.visibility = View.VISIBLE
+
+                uploadTask.addOnCompleteListener {
+                    uploadProgressBar.visibility = View.GONE
+                    callback()
+                }.addOnProgressListener {
+                    uploadProgressBar.progress = (100f * (it.bytesTransferred / it.totalByteCount.toDouble())).toInt()
+                }
+
+            } else {
+                callback()
             }
-        }
 
-        uploadTask.addOnCompleteListener {
-            uploadProgressBar.visibility = View.GONE
         }
-
-        uploadTask.addOnFailureListener({
-            uploadProgressBar.visibility = View.GONE
-        }).addOnSuccessListener({ taskSnapshot ->
-            uploadProgressBar.visibility = View.GONE
-            // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
-        })
 
     }
 
@@ -331,6 +327,10 @@ class ChatActivity : ConnectedActivity() {
 
         }
 
+    }
+
+    private fun deleteImageFile() {
+        photoFile?.delete()
     }
 
     private fun createImageFile(): File {

@@ -14,8 +14,6 @@ import com.bumptech.glide.Glide
 import com.firebase.ui.storage.images.FirebaseImageLoader
 import com.github.curioustechizen.ago.RelativeTimeTextView
 import com.google.firebase.storage.StorageReference
-import com.makeramen.roundedimageview.RoundedTransformationBuilder
-import com.squareup.picasso.Picasso
 
 
 class ChatMessageHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -125,18 +123,17 @@ class ChatMessageHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
     }
 
-    private fun ImageView.loadUrlAsRoundImage(url: String) {
-
-        val transformation = RoundedTransformationBuilder()
-                .oval(true)
-                .build()
-
-        Picasso.with(context).load(url).fit().transform(transformation).into(this)
-
+    private fun ImageView.loadUrlAsRoundImage(uri: String) {
+        Glide.with(context)
+                .load(uri)
+                .transform(CircleTransform(context))
+                .into(this)
     }
 
     private fun ImageView.loadUri(uri: Uri) {
-        Picasso.with(context).load(uri).into(this)
+        Glide.with(context)
+                .load(uri)
+                .into(this)
     }
 
 }

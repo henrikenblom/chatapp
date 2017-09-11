@@ -352,7 +352,7 @@ class ChatActivity : ConnectedActivity() {
 
         val onlyBoundsOptions = BitmapFactory.Options()
         onlyBoundsOptions.inJustDecodeBounds = true
-        onlyBoundsOptions.inPreferredConfig = Bitmap.Config.ARGB_8888//optional
+        onlyBoundsOptions.inPreferredConfig = Bitmap.Config.ARGB_8888 //optional
         BitmapFactory.decodeStream(input, null, onlyBoundsOptions)
         input.close()
 
@@ -366,7 +366,7 @@ class ChatActivity : ConnectedActivity() {
 
         val bitmapOptions = BitmapFactory.Options()
         bitmapOptions.inSampleSize = getPowerOfTwoForSampleRatio(ratio)
-        bitmapOptions.inPreferredConfig = Bitmap.Config.ARGB_8888//
+        bitmapOptions.inPreferredConfig = Bitmap.Config.ARGB_8888
         input = contentResolver.openInputStream(uri)
         val bitmap = BitmapFactory.decodeStream(input, null, bitmapOptions)
         input.close()

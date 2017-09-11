@@ -1,12 +1,12 @@
 package com.enblom.chatapp
 
+import android.net.Uri
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.TextView
-import com.makeramen.roundedimageview.RoundedTransformationBuilder
-import com.squareup.picasso.Picasso
+import com.bumptech.glide.Glide
 
 class UserListEntryHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
@@ -28,14 +28,11 @@ class UserListEntryHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         textView?.text = displayName
     }
 
-    private fun setProfileImage(photoURL: String?) {
-
-        val transformation = RoundedTransformationBuilder()
-                .oval(true)
-                .build()
-
-        Picasso.with(itemView.context).load(photoURL).fit().transform(transformation).into(imageView)
-
+    private fun setProfileImage(photoUrl: String?) {
+        Glide.with(itemView.context)
+                .load(Uri.parse(photoUrl))
+                .transform(CircleTransform(itemView.context))
+                .into(imageView)
     }
 
 }

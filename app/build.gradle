@@ -45,8 +45,6 @@ dependencies {
     compile "com.google.android.gms:play-services-auth:$firebaseVersion"
     compile "com.firebaseui:firebase-ui-storage:0.6.0"
     compile 'org.jetbrains.anko:anko:0.10.1'
-    compile 'com.squareup.picasso:picasso:2.5.2'
-    compile 'com.makeramen:roundedimageview:2.3.0'
     compile 'com.firebaseui:firebase-ui-database:2.1.0'
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:cardview-v7:26.0.0-alpha1'

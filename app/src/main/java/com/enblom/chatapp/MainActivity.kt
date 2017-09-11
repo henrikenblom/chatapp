@@ -15,13 +15,12 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.ImageView
+import com.bumptech.glide.Glide
 import com.firebase.ui.database.ClassSnapshotParser
 import com.firebase.ui.database.FirebaseArray
 import com.firebase.ui.database.FirebaseRecyclerAdapter
 import com.google.firebase.database.*
 import com.google.firebase.iid.FirebaseInstanceId
-import com.makeramen.roundedimageview.RoundedTransformationBuilder
-import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.content_main.*
@@ -133,11 +132,10 @@ class MainActivity : ConnectedActivity(), NavigationView.OnNavigationItemSelecte
 
     fun ImageView.loadUrlAsRoundImage(url: String) {
 
-        val transformation = RoundedTransformationBuilder()
-                .oval(true)
-                .build()
-
-        Picasso.with(context).load(url).fit().transform(transformation).into(this)
+        Glide.with(context)
+                .load(url)
+                .transform(CircleTransform(context))
+                .into(this)
 
     }
 

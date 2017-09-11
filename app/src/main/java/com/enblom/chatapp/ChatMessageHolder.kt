@@ -1,6 +1,5 @@
 package com.enblom.chatapp
 
-import android.net.Uri
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.CardView
 import android.support.v7.widget.RecyclerView
@@ -68,6 +67,7 @@ class ChatMessageHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         Glide.with(itemView.context)
                 .using(FirebaseImageLoader())
                 .load(storageReference)
+                .dontAnimate()
                 .into(inlineImageView)
 
         inlineImageView?.visibility = View.VISIBLE
@@ -76,7 +76,12 @@ class ChatMessageHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
     fun bindTextMessage(text: String?, photoUrl: String? = null, ownMessage: Boolean, imageDecoration: ImageDecoration, messageTime: Long?) {
 
+        Glide.clear(inlineImageView)
+        inlineImageView?.setImageDrawable(null)
+        inlineImageView?.visibility = View.GONE
+        messageTextView?.visibility = View.VISIBLE
         messageTextView?.text = text
+
         var messageBackgroundColor = ContextCompat.getColor(itemView.context, R.color.chatapp_my_message)
         var messageTextSize = itemView.resources.getDimension(R.dimen.chat_message_textsize)
         val emojiTextSize = messageTextSize * 2
@@ -127,12 +132,6 @@ class ChatMessageHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         Glide.with(context)
                 .load(uri)
                 .transform(CircleTransform(context))
-                .into(this)
-    }
-
-    private fun ImageView.loadUri(uri: Uri) {
-        Glide.with(context)
-                .load(uri)
                 .into(this)
     }
 

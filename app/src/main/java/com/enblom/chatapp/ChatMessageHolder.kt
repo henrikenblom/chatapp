@@ -64,6 +64,8 @@ class ChatMessageHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
             }
         }
 
+        inlineImageView?.layout(0, 0, 0, 0)
+
         Glide.with(itemView.context)
                 .using(FirebaseImageLoader())
                 .load(storageReference)

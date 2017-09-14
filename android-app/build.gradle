@@ -13,8 +13,8 @@ android {
         applicationId "com.enblom.chatapp"
         minSdkVersion 19
         targetSdkVersion 26
-        versionCode 4
-        versionName "1.1"
+        versionCode 5
+        versionName "1.0b"
         setProperty("archivesBaseName", "Enblom-Chatapp-$versionName")
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }

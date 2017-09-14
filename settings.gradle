@@ -1,1 +1,1 @@
-include ':app', ':myapplication', ':myapplication2'
+include ':android-app', ':myapplication', ':myapplication2'

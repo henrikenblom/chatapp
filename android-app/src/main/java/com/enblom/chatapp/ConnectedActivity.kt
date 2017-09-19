@@ -10,6 +10,11 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.iid.FirebaseInstanceId
 import java.util.zip.CRC32
 
+/**
+ * A abstract Activity class to use for Firebase connected activities.
+ *
+ * Also provides logic for identifying foreground/background state of the app.
+ */
 abstract class ConnectedActivity : AppCompatActivity() {
 
     val firebaseDatabase: FirebaseDatabase = FirebaseDatabase.getInstance()

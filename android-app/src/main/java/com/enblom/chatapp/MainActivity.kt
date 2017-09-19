@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.support.design.widget.NavigationView
 import android.support.v13.app.ActivityCompat
 import android.support.v4.view.GravityCompat
-import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.widget.LinearLayoutManager
 import android.view.MenuItem
@@ -33,7 +32,7 @@ fun Context.MainActivityIntent(): Intent {
 
 class MainActivity : ConnectedActivity(), NavigationView.OnNavigationItemSelectedListener {
 
-    val MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 10
+    private val PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 10
     val databaseReference: DatabaseReference = FirebaseDatabase.getInstance().reference
     val userProfileParser = ClassSnapshotParser<UserProfile>(UserProfile::class.java)
     private val mLinearLayoutManager: LinearLayoutManager = LinearLayoutManager(this)
@@ -70,12 +69,11 @@ class MainActivity : ConnectedActivity(), NavigationView.OnNavigationItemSelecte
             }
         })
 
-        val navigationView = findViewById(R.id.nav_view) as NavigationView
-        navigationView.setNavigationItemSelectedListener(this)
+        nav_view.setNavigationItemSelectedListener(this)
 
         ActivityCompat.requestPermissions(this,
                 arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),
-                MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE)
+                PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE)
 
         verifyCredentials()
 
@@ -153,10 +151,10 @@ class MainActivity : ConnectedActivity(), NavigationView.OnNavigationItemSelecte
 
             public override fun populateViewHolder(entryHolder: ChatListEntryHolder, chatData: Any, position: Int) {
 
-                val entryMap = chatData as HashMap<String, Any>
+                val entryMap = chatData as HashMap<*, *>
                 val snapshot = firebaseArray[position]
-                var isGroupChat: Boolean = false
-                var lastActiveAt: Long = 0L
+                var isGroupChat = false
+                var lastActiveAt = 0L
 
                 if (entryMap.containsKey("lastMessageAt")) {
                     lastActiveAt = entryMap["lastMessageAt"] as Long
@@ -213,9 +211,8 @@ class MainActivity : ConnectedActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     override fun onBackPressed() {
-        val drawer = findViewById(R.id.drawer_layout) as DrawerLayout
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START)
+        if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
+            drawer_layout.closeDrawer(GravityCompat.START)
         } else {
             super.onBackPressed()
         }
@@ -229,8 +226,8 @@ class MainActivity : ConnectedActivity(), NavigationView.OnNavigationItemSelecte
             signOut()
         }
 
-        val drawer = findViewById(R.id.drawer_layout) as DrawerLayout
-        drawer.closeDrawer(GravityCompat.START)
+        drawer_layout.closeDrawer(GravityCompat.START)
+
         return true
     }
 }

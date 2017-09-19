@@ -4,10 +4,11 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'io.fabric'
 
 def firebaseVersion = '11.0.4'
+def supportLibraryVersion = '26.1.0'
 
 android {
     compileSdkVersion 26
-    buildToolsVersion "26.0.0"
+    buildToolsVersion '26.0.0'
     defaultConfig {
         vectorDrawables.useSupportLibrary = true
         applicationId "com.enblom.chatapp"
@@ -32,12 +33,14 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.android.support:support-v13:26.0.0-alpha1'
+    compile "com.android.support:support-v13:$supportLibraryVersion"
+    compile "com.android.support:palette-v7:$supportLibraryVersion"
+    compile "com.android.support:exifinterface:$supportLibraryVersion"
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
-    compile 'com.android.support:appcompat-v7:26.0.0-alpha1'
-    compile 'com.android.support:support-v4:26.0.0-alpha1'
-    compile 'com.android.support:design:26.0.0-alpha1'
-    compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    compile "com.android.support:appcompat-v7:$supportLibraryVersion"
+    compile "com.android.support:support-v4:$supportLibraryVersion"
+    compile "com.android.support:design:$supportLibraryVersion"
+    compile "com.android.support.constraint:constraint-layout:1.0.2"
     compile "com.google.firebase:firebase-auth:$firebaseVersion"
     compile "com.google.firebase:firebase-database:$firebaseVersion"
     compile "com.google.firebase:firebase-messaging:$firebaseVersion"
@@ -47,7 +50,7 @@ dependencies {
     compile 'org.jetbrains.anko:anko:0.10.1'
     compile 'com.firebaseui:firebase-ui-database:2.1.0'
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:cardview-v7:26.0.0-alpha1'
+    compile "com.android.support:cardview-v7:$supportLibraryVersion"
     compile 'com.github.curioustechizen.android-ago:library:1.3.4'
     compile('com.crashlytics.sdk.android:crashlytics:2.6.8@aar') {
         transitive = true

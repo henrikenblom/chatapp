@@ -12,7 +12,7 @@ import android.widget.EditText
 
 class EnrichedEditText : EditText {
 
-    val mimeTypes = arrayOf("image/gif")
+    private val mimeTypes = arrayOf("image/gif")
     lateinit var parent: ChatActivity
 
     constructor(context: Context) : super(context)

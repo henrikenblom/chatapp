@@ -4,11 +4,13 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
+import android.support.media.ExifInterface
 import android.support.v4.content.FileProvider
 import android.support.v7.widget.LinearLayoutManager
 import android.view.View
@@ -22,6 +24,8 @@ import kotlinx.android.synthetic.main.activity_chat.*
 import org.jetbrains.anko.sdk25.coroutines.onClick
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.IOException
+import java.io.InputStream
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -311,9 +315,7 @@ class ChatActivity : ConnectedActivity() {
                 if (type != null
                         && type.startsWith("image")
                         && path != null) {
-
                     viewHolder?.bindImageMessage(storageRef.child(path), photoUrl, ownMessage, imageDecoration, submittedAt)
-
                 } else {
                     viewHolder?.bindTextMessage(message.text, photoUrl, ownMessage, imageDecoration, submittedAt)
                 }
@@ -334,43 +336,74 @@ class ChatActivity : ConnectedActivity() {
     }
 
     private fun createImageFile(): File {
-        // Create an image file name
+
         val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
         val imageFileName = "JPEG_" + timeStamp + "_"
         val storageDir = this.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-        val image = File.createTempFile(
-                imageFileName, /* prefix */
-                ".jpg", /* suffix */
-                storageDir      /* directory */
+        return File.createTempFile(
+                imageFileName,
+                ".jpg",
+                storageDir
         )
-        return image
     }
 
     private fun getBitmap(uri: Uri): Bitmap? {
 
         var input = contentResolver.openInputStream(uri)
-
-        val onlyBoundsOptions = BitmapFactory.Options()
-        onlyBoundsOptions.inJustDecodeBounds = true
-        onlyBoundsOptions.inPreferredConfig = Bitmap.Config.ARGB_8888 //optional
-        BitmapFactory.decodeStream(input, null, onlyBoundsOptions)
+        val boundsOptions = BitmapFactory.Options()
+        boundsOptions.inJustDecodeBounds = true
+        boundsOptions.inPreferredConfig = Bitmap.Config.ARGB_8888
+        BitmapFactory.decodeStream(input, null, boundsOptions)
         input.close()
 
-        if (onlyBoundsOptions.outWidth == -1 || onlyBoundsOptions.outHeight == -1) {
+        if (boundsOptions.outWidth == -1 || boundsOptions.outHeight == -1) {
             return null
         }
 
-        val originalSize = if (onlyBoundsOptions.outHeight > onlyBoundsOptions.outWidth) onlyBoundsOptions.outHeight else onlyBoundsOptions.outWidth
-
+        val originalSize = if (boundsOptions.outHeight > boundsOptions.outWidth)
+            boundsOptions.outHeight
+        else
+            boundsOptions.outWidth
         val ratio = if (originalSize > MAX_BITMAP_SIZE_TARGET) originalSize / MAX_BITMAP_SIZE_TARGET else 1.0
-
         val bitmapOptions = BitmapFactory.Options()
         bitmapOptions.inSampleSize = getPowerOfTwoForSampleRatio(ratio)
         bitmapOptions.inPreferredConfig = Bitmap.Config.ARGB_8888
         input = contentResolver.openInputStream(uri)
         val bitmap = BitmapFactory.decodeStream(input, null, bitmapOptions)
         input.close()
-        return bitmap
+
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, getImageRotationMatrix(uri), false)
+
+    }
+
+    private fun getImageRotationMatrix(uri: Uri): Matrix {
+
+        val matrix = Matrix()
+        var inputStream: InputStream? = null
+        try {
+            inputStream = contentResolver.openInputStream(uri)
+            val exifInterface = ExifInterface(inputStream)
+            val orientation = exifInterface.getAttributeInt(
+                    ExifInterface.TAG_ORIENTATION,
+                    ExifInterface.ORIENTATION_NORMAL)
+            when (orientation) {
+                ExifInterface.ORIENTATION_ROTATE_90 -> matrix.preRotate(90f)
+                ExifInterface.ORIENTATION_ROTATE_180 -> matrix.preRotate(180f)
+                ExifInterface.ORIENTATION_ROTATE_270 -> matrix.preRotate(270f)
+            }
+        } catch (e: IOException) {
+            // noop
+        } finally {
+            if (inputStream != null) {
+                try {
+                    inputStream.close()
+                } catch (ignored: IOException) {
+                }
+            }
+        }
+
+        return matrix
+
     }
 
     private fun getPowerOfTwoForSampleRatio(ratio: Double): Int {
